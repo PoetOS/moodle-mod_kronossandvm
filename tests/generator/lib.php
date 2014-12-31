@@ -14,30 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die();
+
 /**
- * Kronos sandbox.
+ * Data generator.
  *
  * @package    mod_kronossandvm
  * @author     Remote-Learner.net Inc
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @copyright  (C) 2014 Remote Learner.net Inc http://www.remote-learner.net
  */
+class mod_kronossandvm_generator extends testing_module_generator {
 
-defined('MOODLE_INTERNAL') || die();
-
-$capabilities = array(
-    'mod/kronossandvm:addinstance' => array(
-        'riskbitmask' => RISK_PERSONAL,
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
-            'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        ),
-        'clonepermissionsfrom' => 'moodle/course:manageactivities'
-    ),
-    'mod/kronossandvm:employee' => array(
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_MODULE,
-    )
-);
+}

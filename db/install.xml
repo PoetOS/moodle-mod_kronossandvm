@@ -5,10 +5,10 @@
 >
   <TABLES>
     <TABLE NAME="kronossandvm" COMMENT="all activities">
-        <FIELD NAME="otcourseid" TYPE="char" LENGTH="50" NOTNULL="true" DEFAULT="dictionary" SEQUENCE="false"/>
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="otcourseid" TYPE="char" LENGTH="50" NOTNULL="true" DEFAULT="dictionary" SEQUENCE="false"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="intro" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
@@ -22,6 +22,26 @@
       <INDEXES>
         <INDEX NAME="course" UNIQUE="false" FIELDS="course"/>
       </INDEXES>
+    </TABLE>
+    <TABLE NAME="vm_requests" COMMENT="Each user VM request" PREVIOUS="kronossandvm">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" ENUM="false" NEXT="vmid"/>
+        <FIELD NAME="vmid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="id" NEXT="userid"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="vmid" NEXT="requesttime"/>
+        <FIELD NAME="requesttime" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="userid" NEXT="starttime"/>
+        <FIELD NAME="starttime" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="requesttime" NEXT="endtime"/>
+        <FIELD NAME="endtime" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="starttime" NEXT="instanceid"/>
+        <FIELD NAME="instanceid" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" ENUM="false" COMMENT="Instance id from Amazon EC2" PREVIOUS="endtime" NEXT="instanceip"/>
+        <FIELD NAME="instanceip" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" ENUM="false" COMMENT="Instance ipaddress from Amazon EC2" PREVIOUS="instanceid" NEXT="isscript"/>
+        <FIELD NAME="isscript" TYPE="int" LENGTH="3" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="instanceip" NEXT="username"/>
+        <FIELD NAME="username" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" ENUM="false" COMMENT="Instance username" PREVIOUS="isscript" NEXT="password"/>
+        <FIELD NAME="password" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" ENUM="false" COMMENT="Instance password" PREVIOUS="username" NEXT="isactive"/>
+        <FIELD NAME="isactive" TYPE="int" LENGTH="3" NOTNULL="true" UNSIGNED="true" DEFAULT="1" SEQUENCE="false" ENUM="false" PREVIOUS="password"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="vmid"/>
+        <KEY NAME="vmid" TYPE="foreign" FIELDS="vmid" REFTABLE="vmactivity" REFFIELDS="id" PREVIOUS="primary"/>
+      </KEYS>
     </TABLE>
   </TABLES>
 </XMLDB>

@@ -23,11 +23,13 @@
  * @copyright  (C) 2014 Remote Learner.net Inc http://www.remote-learner.net
  */
 
+require_once($CFG->libdir.'/eventslib.php');
+
 /**
  * Add instance.
  *
  * @param object $kronossandvm Activity to add.
- * @return int
+ * @return int Id of added instance.
  */
 function kronossandvm_add_instance($kronossandvm) {
     global $DB;
@@ -37,10 +39,10 @@ function kronossandvm_add_instance($kronossandvm) {
     return $returnid;
 }
 
-/*
+/**
  * Update instance.
  *
- * @param object $kronossandvm
+ * @param object $kronossandvm Activity object.
  * @return bool success.
  */
 function kronossandvm_update_instance($kronossandvm) {
@@ -51,7 +53,7 @@ function kronossandvm_update_instance($kronossandvm) {
     return true;
 }
 
-/*
+/**
  * Update instance.
  *
  * @param int $id kronossandvm id
@@ -73,4 +75,149 @@ function kronossandvm_delete_instance($id) {
 
     $DB->delete_records('kronossandvm', array('id' => $id));
     return true;
+}
+
+/**
+ * Form for requesting virtual machine.
+ *
+ * @param int $instanceid Instance id of activity.
+ * @return string HTML of request virtual machine form.
+ */
+function kronossandvm_get_request_form($instanceid) {
+    $msg  = html_writer::start_tag('form', array('method' => 'post', 'action' => 'view.php'));
+    $options = array('type' => 'submit', 'name' => 'submit', 'value' => get_string('requestsystem', 'kronossandvm'));
+    $msg .= html_writer::empty_tag('input', $options);
+    $msg .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'submitted', 'value' => 1));
+    $msg .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'id', 'value' => $instanceid));
+    return $msg;
+}
+
+/**
+ * Form for updating status.
+ *
+ * @param int $instanceid Instance id of activity.
+ * @return string HTML of request update form.
+ */
+function kronossandvm_get_update_form($instanceid) {
+    $msg  = html_writer::start_tag('form', array('method' => 'post', 'action' => 'view.php'));
+    $options = array('type' => 'submit', 'name' => 'submit', 'value' => get_string('updatestatus', 'kronossandvm'));
+    $msg .= html_writer::empty_tag('input', $options);
+    $msg .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'update', 'value' => 1));
+    $msg .= html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'id', 'value' => $instanceid));
+    return $msg;
+}
+
+/**
+ * Check if user can request a virtual machine and return a form or a status message.
+ *
+ * @param object $context Page context.
+ * @param int $instanceid Instance id of activity.
+ * @return array Array containing int if request is allowed and string for message.
+ */
+function kronossandvm_get_message($context, $instanceid) {
+    global $DB, $CFG, $USER;
+    $today = mktime(0, 0, 0, date('m'), date('d'), date('Y'));
+    if (has_capability('mod/kronossandvm:employee', $context, $USER->id)) {
+        $msg = get_string('restrictkronosemployee', 'kronossandvm');
+        return array(0, $msg);
+    }
+
+    // System count per user per day.
+    $sql = 'SELECT COUNT(*) FROM {vm_requests} r WHERE r.userid= ? AND r.requesttime > ?';
+    $max = $CFG->mod_kronossandvm_requestsuserperday;
+    if ($DB->count_records_sql($sql, array($USER->id, $today)) >= $max) {
+        $obj = new stdClass();
+        $obj->limit = get_string('one', 'kronossandvm');
+        if ($CFG->mod_kronossandvm_requestsuserperday > 1) {
+            $obj->limit = $CFG->mod_kronossandvm_requestsuserperday;
+        }
+        $msg = get_string('peruserrestriction', 'kronossandvm', $obj);
+        return array(0, $msg);
+    }
+
+    // System count per solution per day.
+    $sql = 'SELECT udf.id, ud.data
+              FROM {user_info_data} ud, {user_info_field} udf
+             WHERE ud.userid = ?
+                   AND ud.fieldid = udf.id
+                   AND udf.shortname = \'customerid\'';
+    $solutionid = $DB->get_record_sql($sql, array($USER->id));
+    // If the student has not been assigned a soltuion id than do not allow access.
+    if (empty($solutionid)) {
+        $msg = get_string('missingsolutionid', 'kronossandvm');
+        return array(0, $msg);
+    }
+
+    $sql = 'SELECT COUNT(*)
+              FROM {vm_requests} r, {user_info_data} d
+             WHERE d.userid = r.userid
+                   AND d.fieldid = ?
+                   AND d.data = ?
+                   AND r.requesttime > ?';
+    $max = $CFG->mod_kronossandvm_requestssolutionperday;
+    $sql1 = 'SELECT r.*
+               FROM {vm_requests} r, {user_info_data} d
+              WHERE d.userid = r.userid
+                    AND d.fieldid = ?
+                    AND d.data = ?';
+    $total = $DB->count_records_sql($sql, array($solutionid->id, $solutionid->data, $today));
+    if ($total >= $max) {
+        $msg = get_string('persolutionrestriction', 'kronossandvm', $CFG);
+        return array(0, $msg);
+    }
+
+    // System count concurrently at any time.
+    $sql = 'SELECT COUNT(*)
+              FROM {vm_requests} r, {user_info_data} d
+             WHERE d.userid = r.userid
+                   AND r.isactive = 1
+                   AND d.fieldid = ?
+                   AND d.data = ?
+                   AND r.requesttime > ?';
+    $max = $CFG->mod_kronossandvm_requestsconcurrentpercustomer;
+    $total = $DB->count_records_sql($sql, array($solutionid->id, $solutionid->data, $today));
+    if ($total >= $max) {
+        $msg = get_string('conpersolutionrestriction', 'kronossandvm', $CFG);
+        return array(0, $msg);
+    }
+
+    // No issues found so returning form to request virtual machine.
+    $msg = kronossandvm_get_request_form($instanceid);
+    return array(1, $msg);
+}
+
+/**
+ * Add a virtual machine request.
+ *
+ * @param object $context Context object.
+ * @param object $kronossandvm Activity object.
+ * @param object $vmrequest Request to add.
+ * @return int Vmrequest id.
+ */
+function kronossandvm_add_vmrequest($context, $kronossandvm, $vmrequest) {
+    global $DB;
+    $vmrequest->requesttime = time();
+    $params = array(
+        'objectid' => $kronossandvm->id,
+        'context' => $context
+    );
+    $event = \mod_kronossandvm\event\vmrequest_created::create($params);
+    $event->trigger();
+    return $DB->insert_record('vm_requests', $vmrequest);
+}
+
+/**
+ * Build url to link to virtual machine.
+ *
+ * @param object $vmrequest Request to build url for.
+ * @return string URL with tokens replaced with values.
+ */
+function kronossandvm_buildurl($vmrequest) {
+    global $CFG;
+    // Create link from template.
+    $link = $CFG->mod_kronossandvm_requesturl;
+    foreach ((array)$vmrequest as $name => $value) {
+        $link = preg_replace('/\{'.$name.'\}/', urlencode($value), $link);
+    }
+    return $link;
 }
