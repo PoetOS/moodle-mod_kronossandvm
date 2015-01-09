@@ -34,6 +34,10 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
      */
     private $course = null;
     /**
+     * @var int $vmcourseid Virtual machine course id.
+     */
+    private $vmcourseid = null;
+    /**
      * @var int $context Context.
      */
     private $context = null;
@@ -64,8 +68,22 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
     public function setUp() {
         global $DB;
         $this->resetAfterTest();
+        // Setup vm_courses.
+        $obj = new stdClass();
+        $obj->coursename = 'testcoursename';
+        $obj->imageid = 'testid1';
+        $obj->otcourseno = 'testid2';
+        $obj->isactive = 1;
+        $obj->imagesource = 'testid3';
+        $obj->imagetype = 'testid4';
+        $obj->tusername = 'testid5';
+        $obj->tpassword = 'testid6';
+        $obj->imagename = 'testid7';
+        $this->vmcourseid = $DB->insert_record('vm_courses', $obj);
+
         $this->course = $this->getDataGenerator()->create_course();
-        $this->kronossandvm = $this->getDataGenerator()->create_module('kronossandvm', array('course' => $this->course->id));
+        $options = array('course' => $this->course->id, 'otcourseid' => $this->vmcourseid);
+        $this->kronossandvm = $this->getDataGenerator()->create_module('kronossandvm', $options);
         $this->instance = context_module::instance($this->kronossandvm->cmid);
         $this->context = context_course::instance($this->course->id);
         $roleid = create_role('Employee role', 'employeerole', 'Employee role description');
@@ -156,7 +174,7 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
         global $CFG;
         $this->setupcustomfield();
         $newreq = new stdClass();
-        $newreq->vmid = $this->instance->id;
+        $newreq->vmid = $this->kronossandvm->id;
         $newreq->userid = $this->users[0]->id;
         $reqid = kronossandvm_add_vmrequest($this->context, $this->kronossandvm, $newreq);
         $this->setUser($this->users[0]);
@@ -177,7 +195,7 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
         global $CFG;
         $this->setupcustomfield();
         $newreq = new stdClass();
-        $newreq->vmid = $this->instance->id;
+        $newreq->vmid = $this->kronossandvm->id;
         $newreq->isactive = 1;
         $newreq->userid = $this->users[0]->id;
         for ($i = 0; $i < ($CFG->mod_kronossandvm_requestssolutionperday + 2); $i++) {
@@ -197,7 +215,7 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
         global $CFG;
         $this->setupcustomfield();
         $newreq = new stdClass();
-        $newreq->vmid = $this->instance->id;
+        $newreq->vmid = $this->kronossandvm->id;
         $newreq->isactive = 1;
         $newreq->userid = $this->users[0]->id;
         for ($i = 0; $i < ($CFG->mod_kronossandvm_requestsconcurrentpercustomer + 2); $i++) {
@@ -219,7 +237,7 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
         // For capturing events.
         $sink = $this->redirectEvents();
         $newreq = new stdClass();
-        $newreq->vmid = $this->instance->id;
+        $newreq->vmid = $this->kronossandvm->id;
         $newreq->userid = $this->users[0]->id;
         $reqid = kronossandvm_add_vmrequest($this->context, $this->kronossandvm, $newreq);
         $events = $sink->get_events();
@@ -236,7 +254,7 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
     public function test_kronossandvm_buildurl() {
         global $CFG;
         $newreq = new stdClass();
-        $newreq->vmid = $this->instance->id;
+        $newreq->vmid = $this->kronossandvm->id;
         $newreq->userid = $this->users[0]->id;
         $newreq->instanceip = '1.2.3.4';
         $newreq->instanceid = 'bb&#d33';
@@ -247,5 +265,54 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
         $expected .= '&userid='.$newreq->userid.'&vmid='.$newreq->vmid.'&instanceid='.urlencode($newreq->instanceid);
         $link = kronossandvm_buildurl($newreq);
         $this->assertEquals($expected, $link);
+    }
+
+    /**
+     * Test retrieving virtual machine requests.
+     */
+    public function test_webservice_vm_requests() {
+        global $DB, $CFG;
+        require_once($CFG->dirroot.'/mod/kronossandvm/externallib.php');
+        // Setup.
+        $webservice = new mod_kronossandvm_external();
+        $result = $webservice->vm_requests();
+        $this->assertCount(0, $result);
+        $this->setupcustomfield();
+        $this->setcustomfielddata($this->users[1]->id, 'test');
+        // Add first request.
+        $newreq = new stdClass();
+        $newreq->vmid = $this->kronossandvm->id;
+        $newreq->userid = $this->users[0]->id;
+        $reqid = kronossandvm_add_vmrequest($this->context, $this->kronossandvm, $newreq);
+        // Test there is one request.
+        $result = $webservice->vm_requests();
+        $this->assertEquals($this->users[0]->id, $result[1]->userid);
+        $this->assertCount(1, $result);
+        $this->assertEquals($this->users[0]->id, $result[1]->userid);
+        // Add second request.
+        $newreq->userid = $this->users[1]->id;
+        $reqid = kronossandvm_add_vmrequest($this->context, $this->kronossandvm, $newreq);
+        $result = $webservice->vm_requests();
+        // Test there is two requests.
+        $this->assertCount(2, $result);
+        $this->assertEquals($this->users[1]->id, $result[2]->userid);
+        // Update request.
+        $request = $DB->get_record('vm_requests', array('id' => $result[1]->id));
+        $request->isscript = 1;
+        $request->instanceip = '1.2.3.4';
+        $DB->update_record('vm_requests', $request);
+        // Test there is one request.
+        $result = $webservice->vm_requests();
+        $this->assertCount(1, $result);
+        $this->assertEquals($this->users[1]->id, $result[2]->userid);
+        // Update request.
+        $result = array_pop($result);
+        $request = $DB->get_record('vm_requests', array('id' => $result->id));
+        $request->isscript = 1;
+        $request->instanceip = '1.2.3.4';
+        $DB->update_record('vm_requests', $request);
+        // Test there is no requests.
+        $result = $webservice->vm_requests();
+        $this->assertCount(0, $result);
     }
 }

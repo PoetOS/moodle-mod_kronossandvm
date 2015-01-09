@@ -50,6 +50,25 @@ class mod_kronossandvm_mod_form extends moodleform_mod {
 
         $this->standard_coursemodule_elements();
 
+        if (!$options = $DB->get_records_menu("vm_courses", null, 'imageid', 'id, coursename')) {
+                // Place holder data.
+                $obj = new stdClass();
+                $obj->coursename = 'testcoursename';
+                $obj->imageid = 'testid1';
+                $obj->otcourseno = 'testid2';
+                $obj->imagesource = 'testid3';
+                $obj->isactive = 1;
+                $obj->imagetype = 'testid4';
+                $obj->tusername = 'testid5';
+                $obj->tpassword = 'testid6';
+                $obj->imagename = 'testid7';
+                $DB->insert_record('vm_courses', $obj);
+                $options = $DB->get_records_menu("vm_courses", null, 'imageid', 'id, coursename');
+        }
+
+        $mform->addElement('select', 'otcourseid', get_string('otcourseid', 'kronossandvm'), $options);
+        $mform->addRule('otcourseid', get_string('required'), 'required', null, 'client');
+
         $this->add_action_buttons();
     }
 }
