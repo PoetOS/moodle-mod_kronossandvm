@@ -66,3 +66,5 @@ $string['missingsolutionid'] = 'Missing solution id, please contact the administ
 $string['eventvmrequestcreated'] = 'Virtual machine request created';
 $string['eventvmrequestcreateddescription'] = 'Virtual machine request created by the user with id {$a->userid}';
 $string['one'] = 'one';
+$string['kronossandvm:employee'] = 'Kronos Employee';
+$string['otcourseid'] = 'Course VM';
