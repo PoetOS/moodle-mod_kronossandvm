@@ -101,4 +101,109 @@ class mod_kronossandvm_external extends external_api {
             ))
         );
     }
+
+    /**
+     * Returns description of method parameters for update_vm_requests
+     *
+     * @return external_function_parameters
+     */
+    public static function update_vm_request_parameters() {
+        return new external_function_parameters(array(
+                'id' => new external_value(PARAM_INT, 'Id of request'),
+                'requesttime' => new external_value(PARAM_INT, 'Request time of session', VALUE_OPTIONAL),
+                'starttime' => new external_value(PARAM_INT, 'Start time of session', VALUE_OPTIONAL),
+                'endtime' => new external_value(PARAM_INT, 'End time of session', VALUE_OPTIONAL),
+                'instanceid' => new external_value(PARAM_TEXT, 'Instance id', VALUE_OPTIONAL),
+                'instanceip' => new external_value(PARAM_TEXT, 'Instance ip', VALUE_OPTIONAL),
+                'isscript' => new external_value(PARAM_INT, 'Is script', VALUE_OPTIONAL),
+                'username' => new external_value(PARAM_TEXT, 'VM Request username', VALUE_OPTIONAL),
+                'password' => new external_value(PARAM_TEXT, 'VM Request password', VALUE_OPTIONAL),
+                'isactive' => new external_value(PARAM_INT, 'Is active flag', VALUE_OPTIONAL)
+        ));
+    }
+
+    /**
+     * Update virtual machine request.
+     *
+     * @param int $id Id of session.
+     * @param int $requesttime Request time of sesion.
+     * @param int $starttime Start time of session.
+     * @param int $endtime End time of session.
+     * @param string $instanceid Id of instance.
+     * @param string $instanceip Ip of instance.
+     * @param int $isscript Is request proccessed.
+     * @param string $username Username.
+     * @param string $password Password.
+     * @param int $isactive Is request active.
+     *
+     * @return array Array of virtual machine requests.
+     */
+    public static function update_vm_request($id, $requesttime = null, $starttime = null, $endtime = 0, $instanceid = null,
+            $instanceip = null, $isscript = null, $username = null, $password = null, $isactive = null) {
+        global $DB;
+        $request = $DB->get_record('vm_requests', array('id' => $id));
+        if (empty($request)) {
+            return array('id' => $id, 'status' => 'fail');
+        }
+        $args = func_get_args();
+        $i = 1;
+        foreach (array('requesttime', 'starttime', 'endtime', 'instanceid', 'instanceip', 'isscript', 'username', 'password', 'isactive') as $name) {
+            if (!empty($args[$i]) && $args[$i] != null) {
+                $request->$name = $args[$i];
+            }
+            $i++;
+        }
+        $DB->update_record('vm_requests', $request);
+        return array('id' => $id, 'status' => 'success');
+    }
+
+    /**
+     * Returns description of update_vm_requests return value.
+     *
+     * @return external_single_structure
+     */
+    public static function update_vm_request_returns() {
+        return new external_single_structure(array(
+            'id' => new external_value(PARAM_INT, 'Id of request'),
+            'status' => new external_value(PARAM_TEXT, 'Status of update request. "success" on successful update. "fail" on missing request.')
+        ));
+    }
+
+    /**
+     * Returns description of method parameters for delete_vm_request
+     *
+     * @return external_function_parameters
+     */
+    public static function delete_vm_request_parameters() {
+        return new external_function_parameters(array(
+            'id' => new external_value(PARAM_INT, 'Id of request')
+        ));
+    }
+
+    /**
+     * Delete virtual machine request.
+     *
+     * @return array Array of virtual machine requests.
+     */
+    public static function delete_vm_request($id) {
+        global $DB;
+        $request = $DB->get_record('vm_requests', array('id' => $id));
+        if (empty($request)) {
+            return array('id' => $id, 'status' => 'fail');
+        }
+        $DB->delete_records('vm_requests', array('id' => $id));
+        return array('id' => $id, 'status' => 'success');
+    }
+
+    /**
+     * Returns description of delete_vm_request return value
+     *
+     * @return external_single_structure
+     */
+    public static function delete_vm_request_returns() {
+        return new external_single_structure(array(
+            'id' => new external_value(PARAM_INT, 'Id of request'),
+            'status' => new external_value(PARAM_TEXT, 'Status of update request. "success" on successful update. "fail" on missing request.')
+        ));
+    }
 }

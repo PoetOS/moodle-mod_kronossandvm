@@ -30,13 +30,29 @@ $functions = array (
         'classpath' => 'mod/kronossandvm/externallib.php',
         'description' => 'Return list of virtual machine requests.',
         'type' => 'read'
-    )
+    ),
+    'mod_kronossandvm_external_update_vm_request' => array (
+        'classname' => 'mod_kronossandvm_external',
+        'methodname' => 'update_vm_request',
+        'classpath' => 'mod/kronossandvm/externallib.php',
+        'description' => 'Update a virtual machine request.',
+        'type' => 'read'
+    ),
+    'mod_kronossandvm_external_delete_vm_request' => array (
+        'classname' => 'mod_kronossandvm_external',
+        'methodname' => 'delete_vm_request',
+        'classpath' => 'mod/kronossandvm/externallib.php',
+        'description' => 'Delete virtual machine request.',
+        'type' => 'read'
+    ),
 );
 
 $services = array (
     'Kronos virtual machine requests' => array (
         'functions' => array (
-            'mod_kronossandvm_external_vm_requests'
+            'mod_kronossandvm_external_vm_requests',
+            'mod_kronossandvm_external_update_vm_request',
+            'mod_kronossandvm_external_delete_vm_request'
             ),
         'restrictedusers' => 0,
         'enabled' => 1

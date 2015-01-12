@@ -315,4 +315,94 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
         $result = $webservice->vm_requests();
         $this->assertCount(0, $result);
     }
+
+    /**
+     * Test updating virtual machine request.
+     */
+    public function test_webservice_update_vm_request() {
+        global $DB, $CFG;
+        require_once($CFG->dirroot.'/mod/kronossandvm/externallib.php');
+        // Setup.
+        $webservice = new mod_kronossandvm_external();
+        $this->setupcustomfield();
+        $this->setcustomfielddata($this->users[1]->id, 'test');
+        // Add first request.
+        $newreq = new stdClass();
+        $newreq->vmid = $this->kronossandvm->id;
+        $newreq->userid = $this->users[0]->id;
+        $reqid = kronossandvm_add_vmrequest($this->context, $this->kronossandvm, $newreq);
+        // Test updating all records.
+        $result = $webservice->update_vm_request($reqid, 5, 6, 7, 8, '1.2.3.4', 1, 'user1', 'password1', 1);
+        $this->assertEquals('success', $result['status']);
+        $this->assertEquals($reqid, $result['id']);
+        $request = $DB->get_record('vm_requests', array('id' => $reqid));
+        $this->assertEquals(5, $request->requesttime);
+        $this->assertEquals(6, $request->starttime);
+        $this->assertEquals('password1', $request->password);
+        // Test updating some records with values already assigned.
+        $result = $webservice->update_vm_request($reqid, null, 77);
+        $this->assertEquals('success', $result['status']);
+        $this->assertEquals($reqid, $result['id']);
+        $request = $DB->get_record('vm_requests', array('id' => $reqid));
+        $this->assertEquals(5, $request->requesttime);
+        $this->assertEquals(77, $request->starttime);
+        $this->assertEquals('password1', $request->password);
+        // Adding second record.
+        $newreq->userid = $this->users[1]->id;
+        $reqid = kronossandvm_add_vmrequest($this->context, $this->kronossandvm, $newreq);
+        $request = $DB->get_record('vm_requests', array('id' => $reqid));
+        // Test updating some records with values unassigned.
+        $result = $webservice->update_vm_request($reqid, null, 77, null, 'instanceid', '4.3.2.1', null, 'username');
+        $this->assertEquals('success', $result['status']);
+        $this->assertEquals($reqid, $result['id']);
+        $request = $DB->get_record('vm_requests', array('id' => $reqid));
+        $this->assertEquals(77, $request->starttime);
+        $this->assertEquals('4.3.2.1', $request->instanceip);
+        // Test value remains unchanged.
+        $this->assertEquals(NULL, $request->password);
+        // Test updating some record that does not exist.
+        $result = $webservice->update_vm_request(-99, null, 77, null, 'instanceid', '4.3.2.1', null, 'username');
+        $this->assertEquals('fail', $result['status']);
+        $this->assertEquals(-99, $result['id']);
+    }
+
+    /**
+     * Test deleting virtual machine request.
+     */
+    public function test_webservice_delete_vm_request() {
+        global $DB, $CFG;
+        require_once($CFG->dirroot.'/mod/kronossandvm/externallib.php');
+        // Setup.
+        $webservice = new mod_kronossandvm_external();
+        $this->setupcustomfield();
+        $this->setcustomfielddata($this->users[1]->id, 'test');
+        // Add first request.
+        $newreq = new stdClass();
+        $newreq->vmid = $this->kronossandvm->id;
+        $newreq->userid = $this->users[0]->id;
+        $reqidone = kronossandvm_add_vmrequest($this->context, $this->kronossandvm, $newreq);
+        // Add second request.
+        $newreq = new stdClass();
+        $newreq->vmid = $this->kronossandvm->id;
+        $newreq->userid = $this->users[0]->id;
+        $reqidtwo = kronossandvm_add_vmrequest($this->context, $this->kronossandvm, $newreq);
+        $result = $webservice->vm_requests();
+        $this->assertCount(2, $result);
+        // Test deleting one record.
+        $result = $webservice->delete_vm_request($reqidtwo);
+        $this->assertEquals('success', $result['status']);
+        $this->assertEquals($reqidtwo, $result['id']);
+        $result = $webservice->vm_requests();
+        $this->assertCount(1, $result);
+        // Delete first record.
+        $result = $webservice->delete_vm_request($reqidone);
+        $this->assertEquals('success', $result['status']);
+        $this->assertEquals($reqidone, $result['id']);
+        $result = $webservice->vm_requests();
+        $this->assertCount(0, $result);
+        // Delete record that does not exist.
+        $result = $webservice->delete_vm_request($reqidone);
+        $this->assertEquals('fail', $result['status']);
+        $this->assertEquals($reqidone, $result['id']);
+    }
 }
