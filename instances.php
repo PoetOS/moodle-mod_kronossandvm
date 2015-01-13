@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Kronos sandbox.
+ * Kronos virtual machine manager.
  *
  * @package    mod_kronossandvm
  * @author     Remote-Learner.net Inc
@@ -23,22 +23,28 @@
  * @copyright  (C) 2015 Remote Learner.net Inc http://www.remote-learner.net
  */
 
-defined('MOODLE_INTERNAL') || die();
+require_once('../../config.php');
+require_once($CFG->dirroot.'/mod/kronossandvm/lib.php');
+require_once($CFG->dirroot.'/mod/kronossandvm/instances_table.php');
 
-$capabilities = array(
-    'mod/kronossandvm:addinstance' => array(
-        'riskbitmask' => RISK_PERSONAL,
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
-            'teacher' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        ),
-        'clonepermissionsfrom' => 'moodle/course:manageactivities'
-    ),
-    'mod/kronossandvm:employee' => array(
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_MODULE,
-    )
-);
+require_login();
+
+$id = required_param('id', PARAM_INT);
+
+$PAGE->set_pagelayout('admin');
+$PAGE->set_url('/mod/kronossandvm/instances.php', array('id' => $id));
+$PAGE->set_context(context_system::instance());
+
+if (!kronossandvm_canconfig()) {
+    print_error('nopermissiontoshow');
+}
+
+echo $OUTPUT->header();
+
+echo html_writer::tag('h4', get_string('vmcoursesinstances', 'mod_kronossandvm'));
+
+// There is instances using this template currently.
+$table = new instances_table('instances', $id);
+$table->out(25, true);
+
+echo $OUTPUT->footer();

@@ -20,7 +20,7 @@
  * @package    mod_kronossandvm
  * @author     Remote-Learner.net Inc
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @copyright  (C) 2014 Remote Learner.net Inc http://www.remote-learner.net
+ * @copyright  (C) 2015 Remote Learner.net Inc http://www.remote-learner.net
  */
 
 require_once($CFG->libdir.'/eventslib.php');
@@ -220,4 +220,21 @@ function kronossandvm_buildurl($vmrequest) {
         $link = preg_replace('/\{'.$name.'\}/', urlencode($value), $link);
     }
     return $link;
+}
+
+/**
+ * Checks to see if user can configure the virtual templates.
+ *
+ * @param object $context Context.
+ * @return boolean True on has capability to edit virtual machine templates.
+ */
+function kronossandvm_canconfig($context = null) {
+    global $USER;
+    if ($context == null) {
+        $context = context_system::instance();
+    }
+    if (has_capability('moodle/site:config', $context, $USER->id)) {
+        return true;
+    }
+    return false;
 }

@@ -56,6 +56,8 @@
         <FIELD NAME="imagetype" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" ENUM="false" COMMENT="Image type" PREVIOUS="imagename" NEXT="tusername"/>
         <FIELD NAME="tusername" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" ENUM="false" COMMENT="Username" PREVIOUS="imagetype" NEXT="tpassword"/>
         <FIELD NAME="tpassword" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" ENUM="false" COMMENT="Password" PREVIOUS="tpassword"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

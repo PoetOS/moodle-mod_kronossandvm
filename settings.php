@@ -20,10 +20,16 @@
  * @package    mod_kronossandvm
  * @author     Remote-Learner.net Inc
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @copyright  (C) 2014 Remote Learner.net Inc http://www.remote-learner.net
+ * @copyright  (C) 2015 Remote Learner.net Inc http://www.remote-learner.net
  */
 
 defined('MOODLE_INTERNAL') || die;
+
+$ADMIN->add('modsettings', new admin_category('modkronossandvmfolder',
+        get_string('pluginname', 'mod_kronossandvm'), $module->is_enabled() === false));
+
+$settings = new admin_settingpage($section, get_string('settings', 'mod_kronossandvm'),
+        'moodle/site:config', $module->is_enabled() === false);
 
 if ($ADMIN->fulltree) {
     $name = get_string('requestsuserperday', 'mod_kronossandvm');
@@ -46,4 +52,12 @@ if ($ADMIN->fulltree) {
     $settingname = 'mod_kronossandvm_requesturl';
     $default = 'http://edweb2.kronos.com/onsite/connectvm.aspx?sIP={instanceip}';
     $settings->add(new admin_setting_configtext($settingname, $name, $desc, $default, PARAM_TEXT));
+    $url = new moodle_url($CFG->wwwroot.'/mod/kronossandvm/vmcourses.php');
+    $link = html_writer::link($url, get_string('managetemplates', 'mod_kronossandvm'));
+    $settings->add(new admin_setting_heading('mod_templatesconfig', get_string('managetemplatestitle', 'mod_kronossandvm'), $link));
 }
+
+$ADMIN->add('modkronossandvmfolder', $settings);
+$ADMIN->add('modkronossandvmfolder', new admin_externalpage('virtualtemplates', get_string('managetemplates', 'mod_kronossandvm'),
+        $CFG->wwwroot.'/mod/kronossandvm/vmcourses.php'));
+$settings = null;

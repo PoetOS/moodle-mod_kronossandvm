@@ -24,12 +24,12 @@
  */
 
 $string['pluginname'] = 'Kronos sandbox';
+$string['settings'] = 'Settings';
 $string['modulename'] = 'Kronos sandbox';
 $string['modulenameplural'] = 'Kronos sandboxes';
 $string['pluginadministration'] = 'Kronos sandbox activity';
 $string['kronossandvm:addinstance'] = 'Add instance';
-$string['kronossandvm:courseconfig'] = 'Access course configuration';
-$string['kronossandvm:systemconfig'] = 'Access site wide configuration';
+$string['kronossandvm:employee'] = 'Kronos Employee';
 $string['errormoduleid'] = 'Course Module ID was incorrect';
 $string['errorcourseconfig'] = 'The course is misconfigured';
 $string['errormoduleidorinstance'] = 'You must specify a course_module ID or an instance ID';
@@ -66,5 +66,26 @@ $string['missingsolutionid'] = 'Missing solution id, please contact the administ
 $string['eventvmrequestcreated'] = 'Virtual machine request created';
 $string['eventvmrequestcreateddescription'] = 'Virtual machine request created by the user with id {$a->userid}';
 $string['one'] = 'one';
-$string['kronossandvm:employee'] = 'Kronos Employee';
-$string['otcourseid'] = 'Course VM';
+$string['otcourseno'] = 'OT Course No';
+$string['coursename'] = 'Course name';
+$string['imageid'] = 'Image id';
+$string['imagename'] = 'Image name';
+$string['vmwareno'] = 'Vmware no';
+$string['imagesource'] = 'Image source';
+$string['imagetype'] = 'Image type';
+$string['vmcourseslist'] = 'Virtual machine templates';
+$string['tusername'] = 'Username';
+$string['tpassword'] = 'Password';
+$string['isactive'] = 'Active';
+$string['addtemplate'] = 'Add virtual machine';
+$string['templatesneeded'] = 'Virtual machine templates need to be added before creating an activity. Please click here.';
+$string['templatesneededcontact'] = '<span style="color: red">Virtual machine templates need to be added before you can create an activity. Please contact the system adminstrator.</span>';
+$string['edittemplate'] = 'Edit virtual machine';
+$string['confirmdelete'] = 'Are you sure you want to delete ?';
+$string['vmcoursesexist'] = 'The following courses contain an activity using this template, please delete the activity first.';
+$string['instances'] = 'Instances';
+$string['otcourseid'] = 'Virtual machine templates';
+$string['vmcoursesinstances'] = 'Virtual machine instances';
+$string['managetemplates'] = 'Manage virtual machine templates';
+$string['managetemplatestitle'] = 'Virtual machine templates';
+$string['vmactivityduration'] = 'Duration';
