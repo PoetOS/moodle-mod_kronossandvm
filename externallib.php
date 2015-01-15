@@ -36,8 +36,7 @@ class mod_kronossandvm_external extends external_api {
      * @return external_function_parameters
      */
     public static function vm_requests_parameters() {
-        return new external_function_parameters(array(
-        ));
+        return new external_function_parameters(array());
     }
 
     /**
@@ -61,8 +60,6 @@ class mod_kronossandvm_external extends external_api {
                        AND vmr.vmid = a.id
                        AND a.otcourseid = c.id
                        AND vmr.isactive = 1
-                       AND isnull(vmr.instanceip)
-                       AND vmr.isscript = 0
               ORDER BY vmr.id';
         $vmrequests = $DB->get_records_sql($sql);
         return $vmrequests;
@@ -103,22 +100,96 @@ class mod_kronossandvm_external extends external_api {
     }
 
     /**
+     * Returns description of method parameters for get_vm_request
+     *
+     * @return external_function_parameters
+     */
+    public static function get_vm_request_parameters() {
+        return new external_function_parameters(array(
+            'id' => new external_value(PARAM_INT, 'Id of request')
+        ));
+    }
+
+    /**
+     * Get virtual machine request.
+     *
+     * @return array Array of virtual machine request.
+     */
+    public static function get_vm_request($id) {
+        global $DB;
+        $sql = 'SELECT vmr.*, ud.data customerid,
+                       c.coursename, c.imageid, c.otcourseno, c.imagesource, c.imagetype,
+                       c.tusername, c.tpassword, c.imagename, a.duration
+                  FROM {vm_requests} vmr,
+                       {user_info_data} ud,
+                       {user_info_field} udf,
+                       {kronossandvm} a,
+                       {vm_courses} c
+                 WHERE ud.userid = vmr.userid
+                       AND ud.fieldid = udf.id
+                       AND udf.shortname = \'customerid\'
+                       AND vmr.vmid = a.id
+                       AND a.otcourseid = c.id
+                       AND vmr.id = ?';
+        $vmrequests = $DB->get_records_sql($sql, array($id));
+        if (count($vmrequests) > 0) {
+            $result = (array)array_pop($vmrequests);
+            $result['status'] = 'success';
+            return $result;
+        }
+        return array('status' => 'fail', 'id' => $id);
+    }
+
+    /**
+     * Returns description of get_vm_request return value
+     *
+     * @return external_multiple_structure
+     */
+    public static function get_vm_request_returns() {
+        return new external_single_structure(array(
+            'status' => new external_value(PARAM_TEXT, 'Status of request'),
+            'id' => new external_value(PARAM_INT, 'Id of request'),
+            'vmid' => new external_value(PARAM_INT, 'Virtual machine id', VALUE_DEFAULT),
+            'userid' => new external_value(PARAM_INT, 'Id of user who make request', VALUE_DEFAULT),
+            'requesttime' => new external_value(PARAM_INT, 'Request time of session', VALUE_DEFAULT),
+            'starttime' => new external_value(PARAM_INT, 'Start time of session', VALUE_DEFAULT),
+            'endtime' => new external_value(PARAM_INT, 'End time of session', VALUE_DEFAULT),
+            'instanceid' => new external_value(PARAM_TEXT, 'Instance id', VALUE_DEFAULT),
+            'instanceip' => new external_value(PARAM_TEXT, 'Instance ip', VALUE_DEFAULT),
+            'isscript' => new external_value(PARAM_INT, 'Is script', VALUE_DEFAULT),
+            'username' => new external_value(PARAM_TEXT, 'VM Request username', VALUE_DEFAULT),
+            'password' => new external_value(PARAM_TEXT, 'VM Request password', VALUE_DEFAULT),
+            'isactive' => new external_value(PARAM_INT, 'Is active flag', VALUE_DEFAULT),
+            'customerid' => new external_value(PARAM_TEXT, 'Customer id', VALUE_DEFAULT),
+            'coursename' => new external_value(PARAM_TEXT, 'Course name', VALUE_DEFAULT),
+            'imageid' => new external_value(PARAM_TEXT, 'Image Id', VALUE_DEFAULT),
+            'otcourseno' => new external_value(PARAM_TEXT, 'OT Course No', VALUE_DEFAULT),
+            'imagesource' => new external_value(PARAM_TEXT, 'Image source', VALUE_DEFAULT),
+            'imagetype' => new external_value(PARAM_TEXT, 'Image type', VALUE_DEFAULT),
+            'tusername' => new external_value(PARAM_TEXT, 'Username', VALUE_DEFAULT),
+            'tpassword' => new external_value(PARAM_TEXT, 'Password', VALUE_DEFAULT),
+            'imagename' => new external_value(PARAM_TEXT, 'Name of image', VALUE_DEFAULT),
+            'duration' => new external_value(PARAM_INT, 'Duration virtual machine is active.', VALUE_DEFAULT)
+        ));
+    }
+
+    /**
      * Returns description of method parameters for update_vm_requests
      *
      * @return external_function_parameters
      */
     public static function update_vm_request_parameters() {
         return new external_function_parameters(array(
-                'id' => new external_value(PARAM_INT, 'Id of request'),
-                'requesttime' => new external_value(PARAM_INT, 'Request time of session', VALUE_OPTIONAL),
-                'starttime' => new external_value(PARAM_INT, 'Start time of session', VALUE_OPTIONAL),
-                'endtime' => new external_value(PARAM_INT, 'End time of session', VALUE_OPTIONAL),
-                'instanceid' => new external_value(PARAM_TEXT, 'Instance id', VALUE_OPTIONAL),
-                'instanceip' => new external_value(PARAM_TEXT, 'Instance ip', VALUE_OPTIONAL),
-                'isscript' => new external_value(PARAM_INT, 'Is script', VALUE_OPTIONAL),
-                'username' => new external_value(PARAM_TEXT, 'VM Request username', VALUE_OPTIONAL),
-                'password' => new external_value(PARAM_TEXT, 'VM Request password', VALUE_OPTIONAL),
-                'isactive' => new external_value(PARAM_INT, 'Is active flag', VALUE_OPTIONAL)
+            'id' => new external_value(PARAM_INT, 'Id of request'),
+            'requesttime' => new external_value(PARAM_INT, 'Request time of session', VALUE_DEFAULT),
+            'starttime' => new external_value(PARAM_INT, 'Start time of session', VALUE_DEFAULT),
+            'endtime' => new external_value(PARAM_INT, 'End time of session', VALUE_DEFAULT),
+            'instanceid' => new external_value(PARAM_TEXT, 'Instance id', VALUE_DEFAULT),
+            'instanceip' => new external_value(PARAM_TEXT, 'Instance ip', VALUE_DEFAULT),
+            'isscript' => new external_value(PARAM_INT, 'Is script', VALUE_DEFAULT),
+            'username' => new external_value(PARAM_TEXT, 'VM Request username', VALUE_DEFAULT),
+            'password' => new external_value(PARAM_TEXT, 'VM Request password', VALUE_DEFAULT),
+            'isactive' => new external_value(PARAM_INT, 'Is active flag', VALUE_DEFAULT)
         ));
     }
 
@@ -148,7 +219,7 @@ class mod_kronossandvm_external extends external_api {
         $args = func_get_args();
         $i = 1;
         foreach (array('requesttime', 'starttime', 'endtime', 'instanceid', 'instanceip', 'isscript', 'username', 'password', 'isactive') as $name) {
-            if (!empty($args[$i]) && $args[$i] != null) {
+            if ($args[$i] !== null) {
                 $request->$name = $args[$i];
             }
             $i++;

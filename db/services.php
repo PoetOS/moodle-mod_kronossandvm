@@ -45,6 +45,13 @@ $functions = array (
         'description' => 'Delete virtual machine request.',
         'type' => 'read'
     ),
+    'mod_kronossandvm_external_get_vm_request' => array (
+        'classname' => 'mod_kronossandvm_external',
+        'methodname' => 'get_vm_request',
+        'classpath' => 'mod/kronossandvm/externallib.php',
+        'description' => 'Get virtual machine request.',
+        'type' => 'read'
+    ),
 );
 
 $services = array (
@@ -52,7 +59,8 @@ $services = array (
         'functions' => array (
             'mod_kronossandvm_external_vm_requests',
             'mod_kronossandvm_external_update_vm_request',
-            'mod_kronossandvm_external_delete_vm_request'
+            'mod_kronossandvm_external_delete_vm_request',
+            'mod_kronossandvm_external_get_vm_request'
             ),
         'restrictedusers' => 0,
         'enabled' => 1

@@ -338,6 +338,7 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
         $request = $DB->get_record('vm_requests', array('id' => $reqid));
         $this->assertEquals(5, $request->requesttime);
         $this->assertEquals(6, $request->starttime);
+        $this->assertEquals(7, $request->endtime);
         $this->assertEquals('password1', $request->password);
         // Test updating some records with values already assigned.
         $result = $webservice->update_vm_request($reqid, null, 77);
@@ -346,6 +347,15 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
         $request = $DB->get_record('vm_requests', array('id' => $reqid));
         $this->assertEquals(5, $request->requesttime);
         $this->assertEquals(77, $request->starttime);
+        $this->assertEquals('password1', $request->password);
+        // Test updating some records with values already assigned.
+        $result = $webservice->update_vm_request($reqid, null, 77, 88);
+        $this->assertEquals('success', $result['status']);
+        $this->assertEquals($reqid, $result['id']);
+        $request = $DB->get_record('vm_requests', array('id' => $reqid));
+        $this->assertEquals(5, $request->requesttime);
+        $this->assertEquals(77, $request->starttime);
+        $this->assertEquals(88, $request->endtime);
         $this->assertEquals('password1', $request->password);
         // Adding second record.
         $newreq->userid = $this->users[1]->id;
@@ -359,7 +369,7 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
         $this->assertEquals(77, $request->starttime);
         $this->assertEquals('4.3.2.1', $request->instanceip);
         // Test value remains unchanged.
-        $this->assertEquals(NULL, $request->password);
+        $this->assertEquals(null, $request->password);
         // Test updating some record that does not exist.
         $result = $webservice->update_vm_request(-99, null, 77, null, 'instanceid', '4.3.2.1', null, 'username');
         $this->assertEquals('fail', $result['status']);
