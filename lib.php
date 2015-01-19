@@ -238,3 +238,74 @@ function kronossandvm_canconfig($context = null) {
     }
     return false;
 }
+
+/**
+ * Format a csv table row for a message.
+ *
+ * @param array $row Array of items in csv row.
+ * @return object stdClass object containing row field.
+ */
+function kronossandvm_csv2message($row) {
+    $message = new stdClass();
+    $message->row = '';
+    $comma = '';
+    foreach ($row as $item) {
+        $message->row .= $comma.'"'.$item.'"';
+        $comma = ',';
+    }
+    return $message;
+}
+
+/**
+ * Convert and validate csv row into a object.
+ *
+ * @param array $columns Array of row columns.
+ * @param array $requiredcolumns Array of required row columns.
+ * @param array $row Array of items in csv row.
+ * @return object|string stdClass object containing row field or error message.
+ */
+function kronossandvm_csv2object($columns, $requiredcolumns, $row) {
+    global $DB;
+    $redoptions = array('style' => 'color: red');
+    // Check uniqueness of otcourseid.
+    if (!empty($row[1]) && is_numeric($row[1])) {
+        // Doing and update as id column has value.
+        $sql = 'SELECT * FROM {vm_courses} WHERE otcourseno = ? AND id != ? LIMIT 1';
+        $otherrecord = $DB->get_record_sql($sql, array($row[2], $row[1]));
+    } else {
+        // Doing create.
+        $sql = 'SELECT * FROM {vm_courses} WHERE otcourseno = ? LIMIT 1';
+        $otherrecord = $DB->get_record_sql($sql, array($row[2]));
+    }
+    if (!empty($otherrecord)) {
+        return html_writer::tag('p', get_string('csvnonuniqueotcourseno', 'mod_kronossandvm', $otherrecord), $redoptions);
+    }
+    // Check uniqueness of course name.
+    if (!empty($row[1]) && is_numeric($row[1])) {
+        // Doing and update as id column has value.
+        $sql = 'SELECT * FROM {vm_courses} WHERE coursename = ? AND id != ? LIMIT 1';
+        $otherrecord = $DB->get_record_sql($sql, array($row[3], $row[1]));
+    } else {
+        // Doing create.
+        $otherrecord = $DB->get_record_sql('SELECT * FROM {vm_courses} WHERE coursename = ? LIMIT 1', array($row[3]));
+    }
+    if (!empty($otherrecord)) {
+        return html_writer::tag('p', get_string('csvnonuniquecoursename', 'mod_kronossandvm', $otherrecord), $redoptions);
+    }
+    $i = 0;
+    $record = new stdClass();
+    foreach ($columns as $name) {
+        if (isset($row[$i])) {
+            $record->$name = $row[$i];
+        }
+        $i++;
+    }
+    foreach ($requiredcolumns as $name) {
+        if (!isset($record->$name) || strlen($record->$name) == 0) {
+            $message = kronossandvm_csv2message($row);
+            $message->field = $name;
+            return html_writer::tag('p', get_string('csvrequiredfield', 'mod_kronossandvm', $message), $redoptions);
+        }
+    }
+    return $record;
+}

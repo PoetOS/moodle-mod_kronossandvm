@@ -49,6 +49,8 @@ if ($formdata) {
     if (empty($formdata->isactive)) {
         $formdata->isactive = 0;
     }
+    $record->timemodified = time();
+    $record->timecreated = time();
     $DB->insert_record('vm_courses', $formdata);
     redirect($PAGE->url);
 }

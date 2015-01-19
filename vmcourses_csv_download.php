@@ -25,35 +25,39 @@
 
 require_once('../../config.php');
 require_once($CFG->dirroot.'/mod/kronossandvm/lib.php');
-require_once($CFG->dirroot.'/mod/kronossandvm/vmcourses_table.php');
-require_once($CFG->dirroot.'/mod/kronossandvm/vmcourses_form.php');
 
 require_login();
 
-$PAGE->set_pagelayout('admin');
-$id = required_param('id', PARAM_INT);
-$PAGE->set_url('/mod/kronossandvm/edit.php', array('id' => $id));
 $context = context_system::instance();
 $PAGE->set_context($context);
-$PAGE->set_pagelayout('admin');
-$PAGE->set_title(get_string('vmcourseslist', 'mod_kronossandvm'));
-$PAGE->set_heading(get_string('vmcourseslist', 'mod_kronossandvm'));
+
+// Set type to csv and name the file to be downloaded vmtemplates.csv.
+header('Content-Type: text/csv; charset=utf-8');
+header('Content-Disposition: attachment; filename=vmtemplates.csv');
 
 if (!kronossandvm_canconfig()) {
     print_error('nopermissiontoshow');
 }
 
-$data = $DB->get_record('vm_courses', array('id' => $id));
-$mform = new vmcourses_form($PAGE->url, $data);
+$columns = array("action", "id", "otcourseno", "coursename", "imageid",
+        "imagename", "vmwareno", "isactive", "imagesource", "imagetype",
+        "tusername", "tpassword");
+$records = $DB->get_records('vm_courses');
+$data = array();
+// Create a file pointer connected to the output stream.
+$output = fopen('php://output', 'w');
+fputcsv($output, $columns);
+// Remove action column.
+array_shift($columns);
 
-if ($mform->is_submitted()) {
-    $data = $mform->get_data();
-    $record->timemodified = time();
-    $DB->update_record('vm_courses', $data);
-    redirect($CFG->wwwroot.'/mod/kronossandvm/vmcourses.php');
-} else {
-    echo $OUTPUT->header();
-    echo html_writer::tag('h1', get_string('edittemplate', 'mod_kronossandvm'));
-    $mform->display();
-    echo $OUTPUT->footer();
+// Output records using fputcsv to format into csv.
+foreach ($records as $record) {
+    $record = (array)$record;
+    $csv = array("update");
+    foreach ($columns as $name) {
+        $csv[] = $record[$name];
+    }
+    fputcsv($output, $csv);
 }
+
+fclose($output);
