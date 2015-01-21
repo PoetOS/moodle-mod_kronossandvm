@@ -72,7 +72,7 @@ class vmcourses_table extends table_sql {
     public function col_instances($values) {
         global $CFG;
         if (!empty($values->instances)) {
-            $link = new moodle_url($CFG->wwwroot.'/mod/kronossandvm/instances.php', array('id' => $values->id));
+            $link = new moodle_url($CFG->wwwroot.'/mod/kronossandvm/vmcourses.php', array('action' => 'instances', 'id' => $values->id));
             return html_writer::tag('a', $values->instances, array('href' => $link));
         }
         return $values->instances;
@@ -86,10 +86,10 @@ class vmcourses_table extends table_sql {
      */
     public function col_id($values) {
         global $CFG;
-        $link = new moodle_url($CFG->wwwroot.'/mod/kronossandvm/edit.php', array('id' => $values->id));
+        $link = new moodle_url($CFG->wwwroot.'/mod/kronossandvm/vmcourses.php', array('action' => 'edit', 'id' => $values->id));
         $html = html_writer::tag('a', get_string('edit'), array('href' => $link));
         $link = new moodle_url($CFG->wwwroot.'/mod/kronossandvm/delete.php', array('id' => $values->id));
-        $options = array('href' => $link, 'onclick' => "confirm('".get_string('confirmdelete', 'mod_kronossandvm')."')");
+        $options = array('href' => $link, 'onclick' => "return confirm('".get_string('confirmdelete', 'mod_kronossandvm')."')");
         $html .= ' ';
         $html .= html_writer::tag('a', get_string('delete'), $options);
         return $html;

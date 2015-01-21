@@ -301,13 +301,21 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
         $request->isscript = 1;
         $request->instanceip = '1.2.3.4';
         $DB->update_record('vm_requests', $request);
-        // Test there is one request.
+        // Test there is two requests.
+        $result = $webservice->vm_requests();
+        $this->assertCount(2, $result);
+        $this->assertEquals($this->users[1]->id, $result[2]->userid);
+        // Update request set isactive = 0.
+        $request->isactive = 0;
+        $DB->update_record('vm_requests', $request);
+        // Test there is one requests.
         $result = $webservice->vm_requests();
         $this->assertCount(1, $result);
         $this->assertEquals($this->users[1]->id, $result[2]->userid);
         // Update request.
         $result = array_pop($result);
         $request = $DB->get_record('vm_requests', array('id' => $result->id));
+        $request->isactive = 0;
         $request->isscript = 1;
         $request->instanceip = '1.2.3.4';
         $DB->update_record('vm_requests', $request);
@@ -332,48 +340,86 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
         $newreq->userid = $this->users[0]->id;
         $reqid = kronossandvm_add_vmrequest($this->context, $this->kronossandvm, $newreq);
         // Test updating all records.
-        $result = $webservice->update_vm_request($reqid, 5, 6, 7, 8, '1.2.3.4', 1, 'user1', 'password1', 1);
+        $requesttime = '1978-03-01 05:00:00';
+        $starttime = '1979-01-09 01:00:00';
+        $endtime = '1979-01-09 16:00:00';
+        $result = $webservice->update_vm_request($reqid, $requesttime, $starttime, $endtime, 8, '1.2.3.4', 1, 'user1', 'password1', 1);
         $this->assertEquals('success', $result['status']);
         $this->assertEquals($reqid, $result['id']);
+
+        // Testing if fields are set.
         $request = $DB->get_record('vm_requests', array('id' => $reqid));
-        $this->assertEquals(5, $request->requesttime);
-        $this->assertEquals(6, $request->starttime);
-        $this->assertEquals(7, $request->endtime);
+        $this->assertEquals($requesttime, userdate($request->requesttime, '%Y-%m-%d %H:%M:%S', 99, false));
+        $this->assertEquals($starttime, userdate($request->starttime, '%Y-%m-%d %H:%M:%S', 99, false));
+        $this->assertEquals($endtime, userdate($request->endtime, '%Y-%m-%d %H:%M:%S', 99, false));
         $this->assertEquals('password1', $request->password);
+
         // Test updating some records with values already assigned.
-        $result = $webservice->update_vm_request($reqid, null, 77);
+        $starttime = '1979-01-09 01:15:00';
+        $result = $webservice->update_vm_request($reqid, null, $starttime);
         $this->assertEquals('success', $result['status']);
         $this->assertEquals($reqid, $result['id']);
+
         $request = $DB->get_record('vm_requests', array('id' => $reqid));
-        $this->assertEquals(5, $request->requesttime);
-        $this->assertEquals(77, $request->starttime);
+        $this->assertEquals($requesttime, userdate($request->requesttime, '%Y-%m-%d %H:%M:%S', 99, false));
+        $this->assertEquals($starttime, userdate($request->starttime, '%Y-%m-%d %H:%M:%S', 99, false));
+        $this->assertEquals($endtime, userdate($request->endtime, '%Y-%m-%d %H:%M:%S', 99, false));
         $this->assertEquals('password1', $request->password);
+
         // Test updating some records with values already assigned.
-        $result = $webservice->update_vm_request($reqid, null, 77, 88);
+        $starttime = '1979-01-09 01:25:00';
+        $endtime = '2015-01-09 18:25:00';
+        $result = $webservice->update_vm_request($reqid, null, $starttime, $endtime);
         $this->assertEquals('success', $result['status']);
         $this->assertEquals($reqid, $result['id']);
         $request = $DB->get_record('vm_requests', array('id' => $reqid));
-        $this->assertEquals(5, $request->requesttime);
-        $this->assertEquals(77, $request->starttime);
-        $this->assertEquals(88, $request->endtime);
+        $this->assertEquals($requesttime, userdate($request->requesttime, '%Y-%m-%d %H:%M:%S', 99, false));
+        $this->assertEquals($starttime, userdate($request->starttime, '%Y-%m-%d %H:%M:%S', 99, false));
+        $this->assertEquals($endtime, userdate($request->endtime, '%Y-%m-%d %H:%M:%S', 99, false));
         $this->assertEquals('password1', $request->password);
+
         // Adding second record.
         $newreq->userid = $this->users[1]->id;
         $reqid = kronossandvm_add_vmrequest($this->context, $this->kronossandvm, $newreq);
         $request = $DB->get_record('vm_requests', array('id' => $reqid));
         // Test updating some records with values unassigned.
-        $result = $webservice->update_vm_request($reqid, null, 77, null, 'instanceid', '4.3.2.1', null, 'username');
+        $starttime = '2017-01-09 02:25:00';
+        $result = $webservice->update_vm_request($reqid, null, $starttime, null, 'instanceid', '4.3.2.1', null, 'username');
         $this->assertEquals('success', $result['status']);
         $this->assertEquals($reqid, $result['id']);
         $request = $DB->get_record('vm_requests', array('id' => $reqid));
-        $this->assertEquals(77, $request->starttime);
+        $this->assertEquals($starttime, userdate($request->starttime, '%Y-%m-%d %H:%M:%S', 99, false));
         $this->assertEquals('4.3.2.1', $request->instanceip);
         // Test value remains unchanged.
         $this->assertEquals(null, $request->password);
         // Test updating some record that does not exist.
+        $this->setExpectedException('invalid_parameter_exception',
+                'Invalid parameter value detected (Record does not exist for id: -99)');
         $result = $webservice->update_vm_request(-99, null, 77, null, 'instanceid', '4.3.2.1', null, 'username');
-        $this->assertEquals('fail', $result['status']);
-        $this->assertEquals(-99, $result['id']);
+    }
+
+    /**
+     * Test updating virtual machine request with an invalid date.
+     */
+    public function test_webservice_update_vm_request_invaliddate() {
+        global $DB, $CFG;
+        require_once($CFG->dirroot.'/mod/kronossandvm/externallib.php');
+        // Setup.
+        $webservice = new mod_kronossandvm_external();
+        $this->setupcustomfield();
+        $this->setcustomfielddata($this->users[1]->id, 'test');
+        // Add first request.
+        $newreq = new stdClass();
+        $newreq->vmid = $this->kronossandvm->id;
+        $newreq->userid = $this->users[0]->id;
+        $reqid = kronossandvm_add_vmrequest($this->context, $this->kronossandvm, $newreq);
+        // Test updating all records.
+        $requesttime = '1978/03/01 05:00:00';
+        $starttime = '1979-01-09 01:00:00';
+        $endtime = '1979-01-09 16:00:00';
+        $this->setExpectedException('invalid_parameter_exception',
+                'Invalid parameter value detected (Invalid value for requesttime, date format should be YYYY-MM-DD HH:MM:SS)');
+        $result = $webservice->update_vm_request($reqid, $requesttime, $starttime, $endtime, 8, '1.2.3.4', 1, 'user1', 'password1', 1);
     }
 
     /**
@@ -410,7 +456,28 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
         $this->assertEquals($reqidone, $result['id']);
         $result = $webservice->vm_requests();
         $this->assertCount(0, $result);
+    }
+
+    /**
+     * Test deleting virtual machine request that does not exist.
+     */
+    public function test_webservice_delete_vm_request_exception() {
+        global $DB, $CFG;
+        require_once($CFG->dirroot.'/mod/kronossandvm/externallib.php');
+        // Setup.
+        $webservice = new mod_kronossandvm_external();
+        $this->setupcustomfield();
+        $this->setcustomfielddata($this->users[1]->id, 'test');
+        // Add first request.
+        $newreq = new stdClass();
+        $newreq->vmid = $this->kronossandvm->id;
+        $newreq->userid = $this->users[0]->id;
+        $reqidone = kronossandvm_add_vmrequest($this->context, $this->kronossandvm, $newreq);
+        // Delete request.
+        $result = $webservice->delete_vm_request($reqidone);
         // Delete record that does not exist.
+        $this->setExpectedException('invalid_parameter_exception',
+                'Invalid parameter value detected (Record does not exist for id: '.$reqidone.')');
         $result = $webservice->delete_vm_request($reqidone);
         $this->assertEquals('fail', $result['status']);
         $this->assertEquals($reqidone, $result['id']);

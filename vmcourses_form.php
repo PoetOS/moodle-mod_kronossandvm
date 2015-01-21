@@ -57,37 +57,51 @@ class vmcourses_form extends moodleform {
      */
     public function definition() {
         $mform =& $this->_form;
-        foreach (array('otcourseno', 'coursename', 'imageid', 'imagename' , 'vmwareno', 'imagesource', 'imagetype', 'tusername', 'tpassword') as $name) {
+        $name = 'otcourseno';
+        $mform->addElement('text', $name, get_string($name, 'mod_kronossandvm'));
+        $mform->setType($name, PARAM_TEXT);
+
+        foreach (array('coursename', 'imageid', 'imagename') as $name) {
+            $mform->addElement('text', $name, get_string($name, 'mod_kronossandvm'), array('size' => 80));
+            $mform->setType($name, PARAM_TEXT);
+        }
+
+        foreach (array('vmwareno', 'imagesource', 'imagetype', 'tusername', 'tpassword') as $name) {
             $mform->addElement('text', $name, get_string($name, 'mod_kronossandvm'));
             $mform->setType($name, PARAM_TEXT);
+        }
+        foreach (array('otcourseno', 'coursename', 'imageid', 'imagename', 'vmwareno', 'imagesource', 'imagetype') as $name) {
+            $mform->addRule($name, null, 'required', null, 'client');
         }
         $mform->addRule('coursename', null, 'required', null, 'client');
         $mform->addElement('checkbox', 'isactive', get_string('isactive', 'mod_kronossandvm'));
         $mform->setType('isactive', PARAM_INT);
         $mform->setDefault('isactive', 1);
-        if ($this->edit) {
-            $mform->addElement('hidden', 'id', 0);
-            $mform->setType('id', PARAM_INT);
-            $mform->addElement('submit', 'submitbutton', get_string('update'));
-        } else {
-            $mform->addElement('submit', 'submitbutton', get_string('add'));
-        }
+
+        $this->add_action_buttons();
+
+        $mform->addElement('hidden', 'id');
+        $mform->setType('id', PARAM_INT);
+        $mform->setDefault('id', 0);
+        $mform->addElement('hidden', 'action');
+        $mform->setType('action', PARAM_TEXT);
+        $mform->setDefault('action', '');
+
     }
 
     /**
-     * Reset data to defaults.
+     * Validate record is unique.
      */
-    public function reset_data() {
-        $this->set_data(array(
-            'otcourseno' => '',
-            'coursename' => '',
-            'imageid' => '',
-            'imagename' => '',
-            'vmwareno' => '',
-            'imagesource' => '',
-            'imagetype' => '',
-            'tusername' => '',
-            'tpassword' => '',
-            'isactive' => 1));
+    public function validation($formdata, $files) {
+        $errors = parent::validation($formdata, $files);
+        $id = null;
+        if (!empty($formdata['id'])) {
+            $id = $formdata['id'];
+        }
+        $check = kronossandvm_vm_courses_is_unique($formdata['otcourseno'], $formdata['coursename'], $id);
+        foreach ($check as $error) {
+            $errors[$error] = get_string('vmcourseserror'.$error, 'mod_kronossandvm');
+        }
+        return $errors;
     }
 }

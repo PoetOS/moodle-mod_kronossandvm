@@ -30,8 +30,9 @@ class instances_table extends table_sql {
      * @param string $uniqueid all tables have to have a unique id, this is used
      *      as a key when storing table properties like sort order in the session.
      * @param int $templateid Id of virtual machine template.
+     * @param string $action current action.
      */
-    public function __construct($uniqueid, $templateid) {
+    public function __construct($uniqueid, $templateid, $action) {
         global $CFG;
         parent::__construct($uniqueid);
         // Define the list of columns to show.
@@ -46,7 +47,7 @@ class instances_table extends table_sql {
         $from = "{kronossandvm} k, {course} c";
         $this->set_sql($fields, $from, 'c.id = k.course AND k.otcourseid = ?', array($templateid));
         $this->no_sorting("id");
-        $this->define_baseurl("$CFG->wwwroot/mod/instances.php", array('id' => $templateid));
+        $this->define_baseurl("$CFG->wwwroot/mod/vmcourses.php", array('action' => $action, 'id' => $templateid));
     }
 
     /**

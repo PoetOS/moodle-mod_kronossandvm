@@ -42,12 +42,7 @@ if (!kronossandvm_canconfig()) {
 $results = $DB->get_records_sql('SELECT c.id, c.fullname FROM {kronossandvm} k, {course} c WHERE c.id = k.course AND k.otcourseid = ?', array($id));
 if (empty($results)) {
     $DB->delete_records('vm_courses', array('id' => $id));
-    redirect($CFG->wwwroot.'/mod/kronossandvm/vmcourses.php');
+    redirect(new moodle_url($CFG->wwwroot.'/mod/kronossandvm/vmcourses.php', array('action' => 'list')));
 } else {
-    echo $OUTPUT->header();
-    echo html_writer::tag('h4', get_string('vmcoursesexist', 'mod_kronossandvm'));
-    // There is instances using this template currently.
-    $table = new instances_table('instances', $id);
-    $table->out(25, true);
-    echo $OUTPUT->footer();
+    redirect(new moodle_url($CFG->wwwroot.'/mod/kronossandvm/vmcourses.php', array('action' => 'instanceswarning', 'id' => $id)));
 }

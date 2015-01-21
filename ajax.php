@@ -48,7 +48,7 @@ foreach (array('otcourseno', 'coursename', 'imageid', 'imagename', 'vmwareno', '
 }
 $sql = "SELECT id, coursename name
           FROM {vm_courses}
-         WHERE {$like}
+         WHERE isactive = 1 AND ({$like})
       ORDER BY coursename ASC
          LIMIT 50";
 $records = $DB->get_recordset_sql($sql, $param);

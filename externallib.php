@@ -62,6 +62,14 @@ class mod_kronossandvm_external extends external_api {
                        AND vmr.isactive = 1
               ORDER BY vmr.id';
         $vmrequests = $DB->get_records_sql($sql);
+        // Convert Moodle unix timestamp into string date format YYYY-MM-DD HH:MM:SS.
+        foreach ($vmrequests as $i => $resquest) {
+            foreach (array('requesttime', 'starttime', 'endtime') as $name) {
+                if (!empty($vmrequests[$i]->$name)) {
+                    $vmrequests[$i]->$name = userdate($vmrequests[$i]->$name, '%Y-%m-%d %H:%M:%S');
+                }
+            }
+        }
         return $vmrequests;
     }
 
@@ -76,15 +84,15 @@ class mod_kronossandvm_external extends external_api {
                 'id' => new external_value(PARAM_INT, 'Id of request'),
                 'vmid' => new external_value(PARAM_INT, 'Virtual machine id'),
                 'userid' => new external_value(PARAM_INT, 'Id of user who make request'),
-                'requesttime' => new external_value(PARAM_INT, 'Request time of session'),
-                'starttime' => new external_value(PARAM_INT, 'Start time of session'),
-                'endtime' => new external_value(PARAM_INT, 'End time of session'),
+                'requesttime' => new external_value(PARAM_TEXT, 'Request time of session with format YYYY-MM-DD HH:MM:SS'),
+                'starttime' => new external_value(PARAM_TEXT, 'Start time of session with format YYYY-MM-DD HH:MM:SS'),
+                'endtime' => new external_value(PARAM_TEXT, 'End time of session with format YYYY-MM-DD HH:MM:SS'),
                 'instanceid' => new external_value(PARAM_TEXT, 'Instance id'),
-                'instanceip' => new external_value(PARAM_TEXT, 'Instance ip'),
-                'isscript' => new external_value(PARAM_INT, 'Is script'),
+                'instanceip' => new external_value(PARAM_TEXT, 'Instance ip with format #.#.#.#'),
+                'isscript' => new external_value(PARAM_INT, 'Is script flag'),
                 'username' => new external_value(PARAM_TEXT, 'VM Request username'),
                 'password' => new external_value(PARAM_TEXT, 'VM Request password'),
-                'isactive' => new external_value(PARAM_INT, 'Is active flag'),
+                'isactive' => new external_value(PARAM_INT, 'Is active flag, 1 = Active, 0 = Inactive'),
                 'customerid' => new external_value(PARAM_TEXT, 'Customer id'),
                 'coursename' => new external_value(PARAM_TEXT, 'Course name'),
                 'imageid' => new external_value(PARAM_TEXT, 'Image Id'),
@@ -134,10 +142,16 @@ class mod_kronossandvm_external extends external_api {
         $vmrequests = $DB->get_records_sql($sql, array($id));
         if (count($vmrequests) > 0) {
             $result = (array)array_pop($vmrequests);
+            // Convert Moodle unix timestamp into string date format YYYY-MM-DD HH:MM:SS.
+            foreach (array('requesttime', 'starttime', 'endtime') as $name) {
+                if (!empty($result[$name])) {
+                    $result[$name] = userdate($result[$name], '%Y-%m-%d %H:%M:%S');
+                }
+            }
             $result['status'] = 'success';
             return $result;
         }
-        return array('status' => 'fail', 'id' => $id);
+        throw new invalid_parameter_exception(get_string('exceptionnotexists', 'mod_kronossandvm', $id));
     }
 
     /**
@@ -151,9 +165,9 @@ class mod_kronossandvm_external extends external_api {
             'id' => new external_value(PARAM_INT, 'Id of request'),
             'vmid' => new external_value(PARAM_INT, 'Virtual machine id', VALUE_DEFAULT),
             'userid' => new external_value(PARAM_INT, 'Id of user who make request', VALUE_DEFAULT),
-            'requesttime' => new external_value(PARAM_INT, 'Request time of session', VALUE_DEFAULT),
-            'starttime' => new external_value(PARAM_INT, 'Start time of session', VALUE_DEFAULT),
-            'endtime' => new external_value(PARAM_INT, 'End time of session', VALUE_DEFAULT),
+            'requesttime' => new external_value(PARAM_TEXT, 'Request time of session', VALUE_DEFAULT),
+            'starttime' => new external_value(PARAM_TEXT, 'Start time of session', VALUE_DEFAULT),
+            'endtime' => new external_value(PARAM_TEXT, 'End time of session', VALUE_DEFAULT),
             'instanceid' => new external_value(PARAM_TEXT, 'Instance id', VALUE_DEFAULT),
             'instanceip' => new external_value(PARAM_TEXT, 'Instance ip', VALUE_DEFAULT),
             'isscript' => new external_value(PARAM_INT, 'Is script', VALUE_DEFAULT),
@@ -181,9 +195,9 @@ class mod_kronossandvm_external extends external_api {
     public static function update_vm_request_parameters() {
         return new external_function_parameters(array(
             'id' => new external_value(PARAM_INT, 'Id of request'),
-            'requesttime' => new external_value(PARAM_INT, 'Request time of session', VALUE_DEFAULT),
-            'starttime' => new external_value(PARAM_INT, 'Start time of session', VALUE_DEFAULT),
-            'endtime' => new external_value(PARAM_INT, 'End time of session', VALUE_DEFAULT),
+            'requesttime' => new external_value(PARAM_TEXT, 'Request time of session', VALUE_DEFAULT),
+            'starttime' => new external_value(PARAM_TEXT, 'Start time of session', VALUE_DEFAULT),
+            'endtime' => new external_value(PARAM_TEXT, 'End time of session', VALUE_DEFAULT),
             'instanceid' => new external_value(PARAM_TEXT, 'Instance id', VALUE_DEFAULT),
             'instanceip' => new external_value(PARAM_TEXT, 'Instance ip', VALUE_DEFAULT),
             'isscript' => new external_value(PARAM_INT, 'Is script', VALUE_DEFAULT),
@@ -197,9 +211,9 @@ class mod_kronossandvm_external extends external_api {
      * Update virtual machine request.
      *
      * @param int $id Id of session.
-     * @param int $requesttime Request time of sesion.
-     * @param int $starttime Start time of session.
-     * @param int $endtime End time of session.
+     * @param string $requesttime Request time of sesion.
+     * @param string $starttime Start time of session.
+     * @param string $endtime End time of session.
      * @param string $instanceid Id of instance.
      * @param string $instanceip Ip of instance.
      * @param int $isscript Is request proccessed.
@@ -214,16 +228,35 @@ class mod_kronossandvm_external extends external_api {
         global $DB;
         $request = $DB->get_record('vm_requests', array('id' => $id));
         if (empty($request)) {
-            return array('id' => $id, 'status' => 'fail');
+            throw new invalid_parameter_exception(get_string('exceptionnotexists', 'mod_kronossandvm', $id));
         }
+
         $args = func_get_args();
         $i = 1;
-        foreach (array('requesttime', 'starttime', 'endtime', 'instanceid', 'instanceip', 'isscript', 'username', 'password', 'isactive') as $name) {
-            if ($args[$i] !== null) {
+
+        // Convert string date format YYYY-MM-DD HH:MM:SS into Moodle timestamp.
+        foreach (array('requesttime', 'starttime', 'endtime') as $name) {
+            if (!empty($args[$i])) {
+                $datetime = date_create_from_format('Y-m-d H:i:s', $args[$i]);
+                if (is_object($datetime)) {
+                    $timestamp = make_timestamp($datetime->format('Y'), $datetime->format('m'), $datetime->format('d'),
+                            $datetime->format('H'), $datetime->format('i'), $datetime->format('s'));
+                    $request->$name = $timestamp;
+                } else {
+                    throw new invalid_parameter_exception(get_string('exceptiondate', 'mod_kronossandvm', $name));
+                }
+            }
+            $i++;
+        }
+
+        $i = 4;
+        foreach (array( 'instanceid', 'instanceip', 'isscript', 'username', 'password', 'isactive') as $name) {
+            if (isset($args[$i]) && $args[$i] !== null) {
                 $request->$name = $args[$i];
             }
             $i++;
         }
+
         $DB->update_record('vm_requests', $request);
         return array('id' => $id, 'status' => 'success');
     }
@@ -236,7 +269,7 @@ class mod_kronossandvm_external extends external_api {
     public static function update_vm_request_returns() {
         return new external_single_structure(array(
             'id' => new external_value(PARAM_INT, 'Id of request'),
-            'status' => new external_value(PARAM_TEXT, 'Status of update request. "success" on successful update. "fail" on missing request.')
+            'status' => new external_value(PARAM_TEXT, 'Status of update request. "success" on successful update. Execption thrown on invalid id, date, isactive, isscript.')
         ));
     }
 
@@ -260,7 +293,7 @@ class mod_kronossandvm_external extends external_api {
         global $DB;
         $request = $DB->get_record('vm_requests', array('id' => $id));
         if (empty($request)) {
-            return array('id' => $id, 'status' => 'fail');
+            throw new invalid_parameter_exception(get_string('exceptionnotexists', 'mod_kronossandvm', $id));
         }
         $DB->delete_records('vm_requests', array('id' => $id));
         return array('id' => $id, 'status' => 'success');
@@ -274,7 +307,7 @@ class mod_kronossandvm_external extends external_api {
     public static function delete_vm_request_returns() {
         return new external_single_structure(array(
             'id' => new external_value(PARAM_INT, 'Id of request'),
-            'status' => new external_value(PARAM_TEXT, 'Status of update request. "success" on successful update. "fail" on missing request.')
+            'status' => new external_value(PARAM_TEXT, 'Status of update request. "success" on successful update. Exception thrown on error.')
         ));
     }
 }

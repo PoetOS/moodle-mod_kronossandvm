@@ -309,3 +309,42 @@ function kronossandvm_csv2object($columns, $requiredcolumns, $row) {
     }
     return $record;
 }
+
+/*
+ * Checks to see if user can configure the virtual templates.
+ *
+ * @param string $otcourseno otcourseno name to check if unique.
+ * @param string $coursename coursename name to check if unique.
+ * @param id $id Optional id of record being edited if editing.
+ * @return array List of fields which are not unique.
+ */
+function kronossandvm_vm_courses_is_unique($otcourseno, $coursename, $id = null) {
+    global $DB;
+    if ($id !== null) {
+        // Doing and update as id column has value.
+        $sql = 'SELECT * FROM {vm_courses} WHERE otcourseno = ? AND id != ? LIMIT 1';
+        $otherrecord = $DB->get_record_sql($sql, array($otcourseno, $id));
+    } else {
+        // Doing create.
+        $sql = 'SELECT * FROM {vm_courses} WHERE otcourseno = ? LIMIT 1';
+        $otherrecord = $DB->get_record_sql($sql, array($otcourseno));
+    }
+    $error = array();
+    if (!empty($otherrecord)) {
+        $error[] = 'otcourseno';
+    }
+    $otherrecord = null;
+    if ($id !== null) {
+        // Doing and update as id column has value.
+        $sql = 'SELECT * FROM {vm_courses} WHERE coursename = ? AND id != ? LIMIT 1';
+        $otherrecord = $DB->get_record_sql($sql, array($coursename, $id));
+    } else {
+        // Doing create.
+        $sql = 'SELECT * FROM {vm_courses} WHERE coursename = ? LIMIT 1';
+        $otherrecord = $DB->get_record_sql($sql, array($coursename));
+    }
+    if (!empty($otherrecord)) {
+        $error[] = 'coursename';
+    }
+    return $error;
+}
