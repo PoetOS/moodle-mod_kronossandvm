@@ -63,6 +63,8 @@ if ($action == 'list') {
         }
         $errors = kronossandvm_vm_courses_is_unique($formdata->otcourseno, $formdata->coursename);
         if (empty($errors)) {
+            $formdata->timemodified = time();
+            $formdata->timecreated = time();
             $DB->insert_record('vm_courses', $formdata);
             redirect(new moodle_url($CFG->wwwroot.'/mod/kronossandvm/vmcourses.php', array('action' => 'list')));
         }
@@ -85,6 +87,7 @@ if ($action == 'list') {
         if (empty($data->isactive)) {
             $data->isactive = 0;
         }
+        $data->timemodified = time();
         $DB->update_record('vm_courses', $data);
         redirect(new moodle_url($CFG->wwwroot.'/mod/kronossandvm/vmcourses.php', array('action' => 'list')));
     } else {

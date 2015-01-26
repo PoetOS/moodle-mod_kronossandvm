@@ -144,7 +144,7 @@ if ($vmrequests = $DB->get_records('vm_requests', array('vmid' => $kronossandvm-
                 $msg .= html_writer::end_tag('div');
                 $msg .= html_writer::start_tag('div', array('id' => 'oinst'));
                 $obj = new stdClass();
-                $obj->endtime = date('d F Y h:i:s A', $vmrequest->endtime);
+                $obj->endtime = userdate($vmrequest->endtime);
                 $msg .= get_string('availableuntil', 'kronossandvm', $obj);
                 $msg .= html_writer::end_tag('div');
             } else {
