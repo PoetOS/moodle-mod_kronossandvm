@@ -140,7 +140,7 @@ function kronossandvm_get_message($context, $instanceid) {
               FROM {user_info_data} ud, {user_info_field} udf
              WHERE ud.userid = ?
                    AND ud.fieldid = udf.id
-                   AND udf.shortname = \'customerid\'';
+                   AND udf.shortname = \'solutionid\'';
     $solutionid = $DB->get_record_sql($sql, array($USER->id));
     // If the student has not been assigned a soltuion id than do not allow access.
     if (empty($solutionid)) {

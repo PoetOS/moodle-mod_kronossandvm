@@ -46,7 +46,7 @@ class mod_kronossandvm_external extends external_api {
      */
     public static function vm_requests() {
         global $DB;
-        $sql = 'SELECT vmr.*, ud.data customerid,
+        $sql = 'SELECT vmr.*, ud.data solutionid,
                        c.coursename, c.imageid, c.otcourseno, c.imagesource, c.imagetype,
                        c.tusername, c.tpassword, c.imagename, a.duration
                   FROM {vm_requests} vmr,
@@ -56,7 +56,7 @@ class mod_kronossandvm_external extends external_api {
                        {vm_courses} c
                  WHERE ud.userid = vmr.userid
                        AND ud.fieldid = udf.id
-                       AND udf.shortname = \'customerid\'
+                       AND udf.shortname = \'solutionid\'
                        AND vmr.vmid = a.id
                        AND a.otcourseid = c.id
                        AND vmr.isactive = 1
@@ -93,7 +93,7 @@ class mod_kronossandvm_external extends external_api {
                 'username' => new external_value(PARAM_TEXT, 'VM Request username'),
                 'password' => new external_value(PARAM_TEXT, 'VM Request password'),
                 'isactive' => new external_value(PARAM_INT, 'Is active flag, 1 = Active, 0 = Inactive'),
-                'customerid' => new external_value(PARAM_TEXT, 'Customer id'),
+                'solutionid' => new external_value(PARAM_TEXT, 'Customer id'),
                 'coursename' => new external_value(PARAM_TEXT, 'Course name'),
                 'imageid' => new external_value(PARAM_TEXT, 'Image Id'),
                 'otcourseno' => new external_value(PARAM_TEXT, 'OT Course No'),
@@ -125,7 +125,7 @@ class mod_kronossandvm_external extends external_api {
      */
     public static function get_vm_request($id) {
         global $DB;
-        $sql = 'SELECT vmr.*, ud.data customerid,
+        $sql = 'SELECT vmr.*, ud.data solutionid,
                        c.coursename, c.imageid, c.otcourseno, c.imagesource, c.imagetype,
                        c.tusername, c.tpassword, c.imagename, a.duration
                   FROM {vm_requests} vmr,
@@ -135,7 +135,7 @@ class mod_kronossandvm_external extends external_api {
                        {vm_courses} c
                  WHERE ud.userid = vmr.userid
                        AND ud.fieldid = udf.id
-                       AND udf.shortname = \'customerid\'
+                       AND udf.shortname = \'solutionid\'
                        AND vmr.vmid = a.id
                        AND a.otcourseid = c.id
                        AND vmr.id = ?';
@@ -174,7 +174,7 @@ class mod_kronossandvm_external extends external_api {
             'username' => new external_value(PARAM_TEXT, 'VM Request username', VALUE_DEFAULT),
             'password' => new external_value(PARAM_TEXT, 'VM Request password', VALUE_DEFAULT),
             'isactive' => new external_value(PARAM_INT, 'Is active flag', VALUE_DEFAULT),
-            'customerid' => new external_value(PARAM_TEXT, 'Customer id', VALUE_DEFAULT),
+            'solutionid' => new external_value(PARAM_TEXT, 'Customer id', VALUE_DEFAULT),
             'coursename' => new external_value(PARAM_TEXT, 'Course name', VALUE_DEFAULT),
             'imageid' => new external_value(PARAM_TEXT, 'Image Id', VALUE_DEFAULT),
             'otcourseno' => new external_value(PARAM_TEXT, 'OT Course No', VALUE_DEFAULT),

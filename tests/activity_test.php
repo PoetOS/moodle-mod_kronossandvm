@@ -103,9 +103,9 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
      */
     public function setupcustomfield() {
         global $DB;
-        // Add a custom field customerid of text type.
+        // Add a custom field solutionid of text type.
         $this->fieldid = $DB->insert_record('user_info_field', array(
-                'shortname' => 'customerid', 'name' => 'Description of customerid', 'categoryid' => 1,
+                'shortname' => 'solutionid', 'name' => 'Description of solutionid', 'categoryid' => 1,
                 'datatype' => 'text'));
         $this->setcustomfielddata($this->users[0]->id, 'test');
     }
@@ -129,7 +129,7 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
     /**
      * Test for message that no customer id exists.
      */
-    public function test_nocustomerid() {
+    public function test_nosolutionid() {
         list ($allow, $message) = kronossandvm_get_message($this->context, $this->instance->id);
         $this->assertEquals(get_string('missingsolutionid', 'kronossandvm'), $message);
         $this->assertEquals(0, $allow);
