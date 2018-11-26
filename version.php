@@ -27,8 +27,8 @@ if (!defined('MOODLE_INTERNAL')) {
     die('Direct access to this script is forbidden.');
 }
 
-$plugin->version = 2014122902;
+$plugin->version = 2018110100;
 $plugin->component = 'mod_kronossandvm';
-$plugin->release = 'Kronos sandbox';
+$plugin->release = 'Kronos sandbox - 3.5.0 Beta';
 $plugin->requires = 2014051202;
-$plugin->maturity = MATURITY_STABLE;
+$plugin->maturity = MATURITY_BETA;

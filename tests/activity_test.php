@@ -82,16 +82,16 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
         $this->vmcourseid = $DB->insert_record('vm_courses', $obj);
 
         $this->course = $this->getDataGenerator()->create_course();
-        $options = array('course' => $this->course->id, 'otcourseid' => $this->vmcourseid);
+        $options = ['course' => $this->course->id, 'otcourseid' => $this->vmcourseid];
         $this->kronossandvm = $this->getDataGenerator()->create_module('kronossandvm', $options);
         $this->instance = context_module::instance($this->kronossandvm->cmid);
         $this->context = context_course::instance($this->course->id);
         $roleid = create_role('Employee role', 'employeerole', 'Employee role description');
         $this->employeeroleid = $roleid;
-        $role = $DB->get_record('role', array('shortname' => 'student'));
+        $role = $DB->get_record('role', ['shortname' => 'student']);
         $this->studentroleid = $role->id;
         assign_capability('mod/kronossandvm:employee', CAP_ALLOW, $this->employeeroleid, $this->context->id);
-        $this->users = array();
+        $this->users = [];
         $this->users[] = $this->getDataGenerator()->create_user();
         $this->users[] = $this->getDataGenerator()->create_user();
         $this->getDataGenerator()->enrol_user($this->users[0]->id, $this->course->id, $role->id);
@@ -104,9 +104,8 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
     public function setupcustomfield() {
         global $DB;
         // Add a custom field solutionid of text type.
-        $this->fieldid = $DB->insert_record('user_info_field', array(
-                'shortname' => 'solutionid', 'name' => 'Description of solutionid', 'categoryid' => 1,
-                'datatype' => 'text'));
+        $this->fieldid = $DB->insert_record('user_info_field',
+            ['shortname' => 'solutionid', 'name' => 'Description of solutionid', 'categoryid' => 1, 'datatype' => 'text']);
         $this->setcustomfielddata($this->users[0]->id, 'test');
     }
 
@@ -286,35 +285,37 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
         $reqid = kronossandvm_add_vmrequest($this->context, $this->kronossandvm, $newreq);
         // Test there is one request.
         $result = $webservice->vm_requests();
-        $this->assertEquals($this->users[0]->id, $result[1]->userid);
         $this->assertCount(1, $result);
-        $this->assertEquals($this->users[0]->id, $result[1]->userid);
+        $result = array_pop($result);
+        $this->assertEquals($this->users[0]->id, $result->userid);
         // Add second request.
         $newreq->userid = $this->users[1]->id;
         $reqid = kronossandvm_add_vmrequest($this->context, $this->kronossandvm, $newreq);
         $result = $webservice->vm_requests();
         // Test there is two requests.
         $this->assertCount(2, $result);
-        $this->assertEquals($this->users[1]->id, $result[2]->userid);
+        $result = array_pop($result);
+        $this->assertEquals($this->users[1]->id, $result->userid);
         // Update request.
-        $request = $DB->get_record('vm_requests', array('id' => $result[1]->id));
+        $request = $DB->get_record('vm_requests', ['id' => $result->id]);
         $request->isscript = 1;
         $request->instanceip = '1.2.3.4';
         $DB->update_record('vm_requests', $request);
         // Test there is two requests.
         $result = $webservice->vm_requests();
         $this->assertCount(2, $result);
-        $this->assertEquals($this->users[1]->id, $result[2]->userid);
+        $result = array_pop($result);
+        $this->assertEquals($this->users[1]->id, $result->userid);
         // Update request set isactive = 0.
         $request->isactive = 0;
         $DB->update_record('vm_requests', $request);
         // Test there is one requests.
         $result = $webservice->vm_requests();
         $this->assertCount(1, $result);
-        $this->assertEquals($this->users[1]->id, $result[2]->userid);
-        // Update request.
         $result = array_pop($result);
-        $request = $DB->get_record('vm_requests', array('id' => $result->id));
+        $this->assertEquals($this->users[0]->id, $result->userid);
+        // Update request.
+        $request = $DB->get_record('vm_requests', ['id' => $result->id]);
         $request->isactive = 0;
         $request->isscript = 1;
         $request->instanceip = '1.2.3.4';
@@ -348,7 +349,7 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
         $this->assertEquals($reqid, $result['id']);
 
         // Testing if fields are set.
-        $request = $DB->get_record('vm_requests', array('id' => $reqid));
+        $request = $DB->get_record('vm_requests', ['id' => $reqid]);
         $this->assertEquals($requesttime, userdate($request->requesttime, '%Y-%m-%d %H:%M:%S', 99, false));
         $this->assertEquals($starttime, userdate($request->starttime, '%Y-%m-%d %H:%M:%S', 99, false));
         $this->assertEquals($endtime, userdate($request->endtime, '%Y-%m-%d %H:%M:%S', 99, false));
@@ -360,7 +361,7 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
         $this->assertEquals('success', $result['status']);
         $this->assertEquals($reqid, $result['id']);
 
-        $request = $DB->get_record('vm_requests', array('id' => $reqid));
+        $request = $DB->get_record('vm_requests', ['id' => $reqid]);
         $this->assertEquals($requesttime, userdate($request->requesttime, '%Y-%m-%d %H:%M:%S', 99, false));
         $this->assertEquals($starttime, userdate($request->starttime, '%Y-%m-%d %H:%M:%S', 99, false));
         $this->assertEquals($endtime, userdate($request->endtime, '%Y-%m-%d %H:%M:%S', 99, false));
@@ -372,7 +373,7 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
         $result = $webservice->update_vm_request($reqid, null, $starttime, $endtime);
         $this->assertEquals('success', $result['status']);
         $this->assertEquals($reqid, $result['id']);
-        $request = $DB->get_record('vm_requests', array('id' => $reqid));
+        $request = $DB->get_record('vm_requests', ['id' => $reqid]);
         $this->assertEquals($requesttime, userdate($request->requesttime, '%Y-%m-%d %H:%M:%S', 99, false));
         $this->assertEquals($starttime, userdate($request->starttime, '%Y-%m-%d %H:%M:%S', 99, false));
         $this->assertEquals($endtime, userdate($request->endtime, '%Y-%m-%d %H:%M:%S', 99, false));
@@ -381,20 +382,20 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
         // Adding second record.
         $newreq->userid = $this->users[1]->id;
         $reqid = kronossandvm_add_vmrequest($this->context, $this->kronossandvm, $newreq);
-        $request = $DB->get_record('vm_requests', array('id' => $reqid));
+        $request = $DB->get_record('vm_requests', ['id' => $reqid]);
         // Test updating some records with values unassigned.
         $starttime = '2017-01-09 02:25:00';
         $result = $webservice->update_vm_request($reqid, null, $starttime, null, 'instanceid', '4.3.2.1', null, 'username');
         $this->assertEquals('success', $result['status']);
         $this->assertEquals($reqid, $result['id']);
-        $request = $DB->get_record('vm_requests', array('id' => $reqid));
+        $request = $DB->get_record('vm_requests', ['id' => $reqid]);
         $this->assertEquals($starttime, userdate($request->starttime, '%Y-%m-%d %H:%M:%S', 99, false));
         $this->assertEquals('4.3.2.1', $request->instanceip);
         // Test value remains unchanged.
         $this->assertEquals(null, $request->password);
         // Test updating some record that does not exist.
-        $this->setExpectedException('invalid_parameter_exception',
-                'Invalid parameter value detected (Record does not exist for id: -99)');
+        $this->expectException('invalid_parameter_exception');
+        $this->expectExceptionMessage('Invalid parameter value detected (Record does not exist for id: -99)');
         $result = $webservice->update_vm_request(-99, null, 77, null, 'instanceid', '4.3.2.1', null, 'username');
     }
 
@@ -417,8 +418,9 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
         $requesttime = '1978/03/01 05:00:00';
         $starttime = '1979-01-09 01:00:00';
         $endtime = '1979-01-09 16:00:00';
-        $this->setExpectedException('invalid_parameter_exception',
-                'Invalid parameter value detected (Invalid value for requesttime, date format should be YYYY-MM-DD HH:MM:SS)');
+        $this->expectException('invalid_parameter_exception');
+        $this->expectExceptionMessage('Invalid parameter value detected (Invalid value for requesttime, date format should be ' .
+            'YYYY-MM-DD HH:MM:SS)');
         $result = $webservice->update_vm_request($reqid, $requesttime, $starttime, $endtime, 8, '1.2.3.4', 1, 'user1', 'password1', 1);
     }
 
@@ -476,8 +478,8 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
         // Delete request.
         $result = $webservice->delete_vm_request($reqidone);
         // Delete record that does not exist.
-        $this->setExpectedException('invalid_parameter_exception',
-                'Invalid parameter value detected (Record does not exist for id: '.$reqidone.')');
+        $this->expectException('invalid_parameter_exception');
+        $this->expectExceptionMessage('Invalid parameter value detected (Record does not exist for id: '.$reqidone.')');
         $result = $webservice->delete_vm_request($reqidone);
         $this->assertEquals('fail', $result['status']);
         $this->assertEquals($reqidone, $result['id']);
