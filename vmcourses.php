@@ -65,7 +65,7 @@ if ($action == 'list') {
         if (empty($errors)) {
             $formdata->timemodified = time();
             $formdata->timecreated = time();
-            $DB->insert_record('vm_courses', $formdata);
+            $DB->insert_record('kronossandvm_courses', $formdata);
             redirect(new moodle_url($CFG->wwwroot.'/mod/kronossandvm/vmcourses.php', array('action' => 'list')));
         }
     }
@@ -76,7 +76,7 @@ if ($action == 'list') {
     $mform->display();
     echo $OUTPUT->footer();
 } else if (!empty($id) && $action == 'edit') {
-    $data = $DB->get_record('vm_courses', array('id' => $id));
+    $data = $DB->get_record('kronossandvm_courses', array('id' => $id));
     $data->action = 'edit';
     $mform = new vmcourses_form($PAGE->url, $data);
 
@@ -88,7 +88,7 @@ if ($action == 'list') {
             $data->isactive = 0;
         }
         $data->timemodified = time();
-        $DB->update_record('vm_courses', $data);
+        $DB->update_record('kronossandvm_courses', $data);
         redirect(new moodle_url($CFG->wwwroot.'/mod/kronossandvm/vmcourses.php', array('action' => 'list')));
     } else {
         echo $OUTPUT->header();
@@ -98,7 +98,7 @@ if ($action == 'list') {
     }
 } else if (!empty($id) && ($action == 'instances' || $action = 'instanceswarning')) {
     echo $OUTPUT->header();
-    $data = $DB->get_record('vm_courses', array('id' => $id));
+    $data = $DB->get_record('kronossandvm_courses', array('id' => $id));
     if ($action == 'instanceswarning') {
         echo html_writer::tag('h4', get_string('vmcoursesexist', 'mod_kronossandvm', $data));
     } else {

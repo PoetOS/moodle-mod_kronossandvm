@@ -49,11 +49,11 @@ class mod_kronossandvm_external extends external_api {
         $sql = 'SELECT vmr.*, ud.data solutionid,
                        c.coursename, c.imageid, c.otcourseno, c.imagesource, c.imagetype,
                        c.tusername, c.tpassword, c.imagename, a.duration
-                  FROM {vm_requests} vmr,
+                  FROM {kronossandvm_requests} vmr,
                        {user_info_data} ud,
                        {user_info_field} udf,
                        {kronossandvm} a,
-                       {vm_courses} c
+                       {kronossandvm_courses} c
                  WHERE ud.userid = vmr.userid
                        AND ud.fieldid = udf.id
                        AND udf.shortname = \'solutionid\'
@@ -128,11 +128,11 @@ class mod_kronossandvm_external extends external_api {
         $sql = 'SELECT vmr.*, ud.data solutionid,
                        c.coursename, c.imageid, c.otcourseno, c.imagesource, c.imagetype,
                        c.tusername, c.tpassword, c.imagename, a.duration
-                  FROM {vm_requests} vmr,
+                  FROM {kronossandvm_requests} vmr,
                        {user_info_data} ud,
                        {user_info_field} udf,
                        {kronossandvm} a,
-                       {vm_courses} c
+                       {kronossandvm_courses} c
                  WHERE ud.userid = vmr.userid
                        AND ud.fieldid = udf.id
                        AND udf.shortname = \'solutionid\'
@@ -226,7 +226,7 @@ class mod_kronossandvm_external extends external_api {
     public static function update_vm_request($id, $requesttime = null, $starttime = null, $endtime = 0, $instanceid = null,
             $instanceip = null, $isscript = null, $username = null, $password = null, $isactive = null) {
         global $DB;
-        $request = $DB->get_record('vm_requests', array('id' => $id));
+        $request = $DB->get_record('kronossandvm_requests', array('id' => $id));
         if (empty($request)) {
             throw new invalid_parameter_exception(get_string('exceptionnotexists', 'mod_kronossandvm', $id));
         }
@@ -257,7 +257,7 @@ class mod_kronossandvm_external extends external_api {
             $i++;
         }
 
-        $DB->update_record('vm_requests', $request);
+        $DB->update_record('kronossandvm_requests', $request);
         return array('id' => $id, 'status' => 'success');
     }
 
@@ -291,11 +291,11 @@ class mod_kronossandvm_external extends external_api {
      */
     public static function delete_vm_request($id) {
         global $DB;
-        $request = $DB->get_record('vm_requests', array('id' => $id));
+        $request = $DB->get_record('kronossandvm_requests', array('id' => $id));
         if (empty($request)) {
             throw new invalid_parameter_exception(get_string('exceptionnotexists', 'mod_kronossandvm', $id));
         }
-        $DB->delete_records('vm_requests', array('id' => $id));
+        $DB->delete_records('kronossandvm_requests', array('id' => $id));
         return array('id' => $id, 'status' => 'success');
     }
 

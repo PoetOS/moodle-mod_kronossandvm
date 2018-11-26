@@ -41,7 +41,7 @@ class mod_kronossandvm_mod_form extends moodleform_mod {
         global $DB, $USER, $CFG, $PAGE;
 
         $mform =& $this->_form;
-        $options = $DB->get_records_menu("vm_courses", array('isactive' => 1), 'imageid', 'id, coursename');
+        $options = $DB->get_records_menu("kronossandvm_courses", array('isactive' => 1), 'imageid', 'id, coursename');
 
         $canconfig = kronossandvm_canconfig();
 
@@ -73,7 +73,7 @@ class mod_kronossandvm_mod_form extends moodleform_mod {
 
             $text = '';
             if (isset($this->current->otcourseid) && is_numeric($this->current->otcourseid)) {
-                $record = $DB->get_record('vm_courses', array('id' => $this->current->otcourseid));
+                $record = $DB->get_record('kronossandvm_courses', array('id' => $this->current->otcourseid));
                 if (!empty($record)) {
                     $text = format_string($record->coursename);
                 }

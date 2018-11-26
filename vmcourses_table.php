@@ -46,7 +46,7 @@ class vmcourses_table extends table_sql {
         $this->sortable(true, 'id', SORT_DESC);
         // Set sql for table.
         $fields = "c.id, c.coursename, c.imageid, c.imagetype, (SELECT COUNT(*) FROM {kronossandvm} k WHERE k.otcourseid = c.id) instances";
-        $from = "{vm_courses} c";
+        $from = "{kronossandvm_courses} c";
         $this->set_sql($fields, $from, '1 = 1', null);
         $this->no_sorting("id");
         $this->define_baseurl("$CFG->wwwroot/mod/vmcourses.php");

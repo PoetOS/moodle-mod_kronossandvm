@@ -47,7 +47,7 @@ foreach (array('otcourseno', 'coursename', 'imageid', 'imagename', 'vmwareno', '
     $and = ' OR ';
 }
 $sql = "SELECT id, coursename name
-          FROM {vm_courses}
+          FROM {kronossandvm_courses}
          WHERE isactive = 1 AND ({$like})
       ORDER BY coursename ASC
          LIMIT 50";

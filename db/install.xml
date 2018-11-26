@@ -23,7 +23,7 @@
         <INDEX NAME="course" UNIQUE="false" FIELDS="course"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="vm_requests" COMMENT="Each user VM request" PREVIOUS="kronossandvm">
+    <TABLE NAME="kronossandvm_requests" COMMENT="Each user VM request" PREVIOUS="kronossandvm">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" ENUM="false" NEXT="vmid"/>
         <FIELD NAME="vmid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="id" NEXT="userid"/>
@@ -43,7 +43,7 @@
         <KEY NAME="vmid" TYPE="foreign" FIELDS="vmid" REFTABLE="vmactivity" REFFIELDS="id" PREVIOUS="primary"/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="vm_courses" COMMENT="Available VM courses" PREVIOUS="kronossandvm">
+    <TABLE NAME="kronossandvm_courses" COMMENT="Available VM courses" PREVIOUS="kronossandvm_requests">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" ENUM="false" NEXT="otcourseno"/>
         <FIELD NAME="otcourseno" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false" ENUM="false" COMMENT="OnTrack course number" PREVIOUS="id" NEXT="coursename"/>

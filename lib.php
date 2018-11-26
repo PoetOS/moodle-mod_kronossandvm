@@ -123,7 +123,7 @@ function kronossandvm_get_message($context, $instanceid) {
     }
 
     // System count per user per day.
-    $sql = 'SELECT COUNT(*) FROM {vm_requests} r WHERE r.userid= ? AND r.requesttime > ?';
+    $sql = 'SELECT COUNT(*) FROM {kronossandvm_requests} r WHERE r.userid= ? AND r.requesttime > ?';
     $max = $CFG->mod_kronossandvm_requestsuserperday;
     if ($DB->count_records_sql($sql, array($USER->id, $today)) >= $max) {
         $obj = new stdClass();
@@ -149,14 +149,14 @@ function kronossandvm_get_message($context, $instanceid) {
     }
 
     $sql = 'SELECT COUNT(*)
-              FROM {vm_requests} r, {user_info_data} d
+              FROM {kronossandvm_requests} r, {user_info_data} d
              WHERE d.userid = r.userid
                    AND d.fieldid = ?
                    AND d.data = ?
                    AND r.requesttime > ?';
     $max = $CFG->mod_kronossandvm_requestssolutionperday;
     $sql1 = 'SELECT r.*
-               FROM {vm_requests} r, {user_info_data} d
+               FROM {kronossandvm_requests} r, {user_info_data} d
               WHERE d.userid = r.userid
                     AND d.fieldid = ?
                     AND d.data = ?';
@@ -168,7 +168,7 @@ function kronossandvm_get_message($context, $instanceid) {
 
     // System count concurrently at any time.
     $sql = 'SELECT COUNT(*)
-              FROM {vm_requests} r, {user_info_data} d
+              FROM {kronossandvm_requests} r, {user_info_data} d
              WHERE d.userid = r.userid
                    AND r.isactive = 1
                    AND d.fieldid = ?
@@ -203,7 +203,7 @@ function kronossandvm_add_vmrequest($context, $kronossandvm, $vmrequest) {
     );
     $event = \mod_kronossandvm\event\vmrequest_created::create($params);
     $event->trigger();
-    return $DB->insert_record('vm_requests', $vmrequest);
+    return $DB->insert_record('kronossandvm_requests', $vmrequest);
 }
 
 /**
@@ -270,11 +270,11 @@ function kronossandvm_csv2object($columns, $requiredcolumns, $row) {
     // Check uniqueness of otcourseid.
     if (!empty($row[1]) && is_numeric($row[1])) {
         // Doing and update as id column has value.
-        $sql = 'SELECT * FROM {vm_courses} WHERE otcourseno = ? AND id != ? LIMIT 1';
+        $sql = 'SELECT * FROM {kronossandvm_courses} WHERE otcourseno = ? AND id != ? LIMIT 1';
         $otherrecord = $DB->get_record_sql($sql, array($row[2], $row[1]));
     } else {
         // Doing create.
-        $sql = 'SELECT * FROM {vm_courses} WHERE otcourseno = ? LIMIT 1';
+        $sql = 'SELECT * FROM {kronossandvm_courses} WHERE otcourseno = ? LIMIT 1';
         $otherrecord = $DB->get_record_sql($sql, array($row[2]));
     }
     if (!empty($otherrecord)) {
@@ -283,11 +283,11 @@ function kronossandvm_csv2object($columns, $requiredcolumns, $row) {
     // Check uniqueness of course name.
     if (!empty($row[1]) && is_numeric($row[1])) {
         // Doing and update as id column has value.
-        $sql = 'SELECT * FROM {vm_courses} WHERE coursename = ? AND id != ? LIMIT 1';
+        $sql = 'SELECT * FROM {kronossandvm_courses} WHERE coursename = ? AND id != ? LIMIT 1';
         $otherrecord = $DB->get_record_sql($sql, array($row[3], $row[1]));
     } else {
         // Doing create.
-        $otherrecord = $DB->get_record_sql('SELECT * FROM {vm_courses} WHERE coursename = ? LIMIT 1', array($row[3]));
+        $otherrecord = $DB->get_record_sql('SELECT * FROM {kronossandvm_courses} WHERE coursename = ? LIMIT 1', array($row[3]));
     }
     if (!empty($otherrecord)) {
         return html_writer::tag('p', get_string('csvnonuniquecoursename', 'mod_kronossandvm', $otherrecord), $redoptions);
@@ -322,11 +322,11 @@ function kronossandvm_vm_courses_is_unique($otcourseno, $coursename, $id = null)
     global $DB;
     if ($id !== null) {
         // Doing and update as id column has value.
-        $sql = 'SELECT * FROM {vm_courses} WHERE otcourseno = ? AND id != ? LIMIT 1';
+        $sql = 'SELECT * FROM {kronossandvm_courses} WHERE otcourseno = ? AND id != ? LIMIT 1';
         $otherrecord = $DB->get_record_sql($sql, array($otcourseno, $id));
     } else {
         // Doing create.
-        $sql = 'SELECT * FROM {vm_courses} WHERE otcourseno = ? LIMIT 1';
+        $sql = 'SELECT * FROM {kronossandvm_courses} WHERE otcourseno = ? LIMIT 1';
         $otherrecord = $DB->get_record_sql($sql, array($otcourseno));
     }
     $error = array();
@@ -336,11 +336,11 @@ function kronossandvm_vm_courses_is_unique($otcourseno, $coursename, $id = null)
     $otherrecord = null;
     if ($id !== null) {
         // Doing and update as id column has value.
-        $sql = 'SELECT * FROM {vm_courses} WHERE coursename = ? AND id != ? LIMIT 1';
+        $sql = 'SELECT * FROM {kronossandvm_courses} WHERE coursename = ? AND id != ? LIMIT 1';
         $otherrecord = $DB->get_record_sql($sql, array($coursename, $id));
     } else {
         // Doing create.
-        $sql = 'SELECT * FROM {vm_courses} WHERE coursename = ? LIMIT 1';
+        $sql = 'SELECT * FROM {kronossandvm_courses} WHERE coursename = ? LIMIT 1';
         $otherrecord = $DB->get_record_sql($sql, array($coursename));
     }
     if (!empty($otherrecord)) {

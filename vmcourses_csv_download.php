@@ -42,7 +42,7 @@ if (!kronossandvm_canconfig()) {
 $columns = array("action", "id", "otcourseno", "coursename", "imageid",
         "imagename", "vmwareno", "isactive", "imagesource", "imagetype",
         "tusername", "tpassword");
-$records = $DB->get_records('vm_courses');
+$records = $DB->get_records('kronossandvm_courses');
 $data = array();
 // Create a file pointer connected to the output stream.
 $output = fopen('php://output', 'w');

@@ -41,7 +41,7 @@ if (!kronossandvm_canconfig()) {
 
 $results = $DB->get_records_sql('SELECT c.id, c.fullname FROM {kronossandvm} k, {course} c WHERE c.id = k.course AND k.otcourseid = ?', array($id));
 if (empty($results)) {
-    $DB->delete_records('vm_courses', array('id' => $id));
+    $DB->delete_records('kronossandvm_courses', array('id' => $id));
     redirect(new moodle_url($CFG->wwwroot.'/mod/kronossandvm/vmcourses.php', array('action' => 'list')));
 } else {
     redirect(new moodle_url($CFG->wwwroot.'/mod/kronossandvm/vmcourses.php', array('action' => 'instanceswarning', 'id' => $id)));

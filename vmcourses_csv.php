@@ -86,7 +86,7 @@ if (empty($formdata)) {
         $handled = false;
         if ($row[0] == 'delete' && is_numeric($row[1])) {
             $handled = true;
-            $record = $DB->get_record('vm_courses', array('id' => $row[1]));
+            $record = $DB->get_record('kronossandvm_courses', array('id' => $row[1]));
             if (empty($record)) {
                 echo html_writer::tag('p', get_string('csvrecordmissingdelete', 'mod_kronossandvm', $row[1]), $redoptions);
             } else {
@@ -98,7 +98,7 @@ if (empty($formdata)) {
                          LIMIT 1';
                 $results = $DB->get_records_sql($sql, array($row[1]));
                 if (empty($results)) {
-                    $DB->delete_records('vm_courses', array('id' => $row[1]));
+                    $DB->delete_records('kronossandvm_courses', array('id' => $row[1]));
                     echo html_writer::tag('p', get_string('csvdelete', 'mod_kronossandvm', $record));
                 } else {
                     echo html_writer::tag('p', get_string('csvdeletehasinstance', 'mod_kronossandvm', $record), $redoptions);
@@ -108,7 +108,7 @@ if (empty($formdata)) {
         // Update record.
         if (($row[0] == 'update' || $row[0] == '') && is_numeric($row[1])) {
             $handled = true;
-            $record = $DB->get_record('vm_courses', array('id' => $row[1]));
+            $record = $DB->get_record('kronossandvm_courses', array('id' => $row[1]));
             if (empty($record)) {
                 $message = kronossandvm_csv2message($row);
                 $message->id = $row[1];
@@ -117,7 +117,7 @@ if (empty($formdata)) {
             } else {
                 $result = kronossandvm_csv2object($columns, $requiredcolumns, $row);
                 if (is_object($result)) {
-                    $DB->update_record('vm_courses', $result);
+                    $DB->update_record('kronossandvm_courses', $result);
                     echo html_writer::tag('p', get_string('csvupdate', 'mod_kronossandvm', $result));
                 } else {
                     echo $result;
@@ -138,7 +138,7 @@ if (empty($formdata)) {
             $i = 0;
             $result->timemodified = time();
             $result->timecreated = time();
-            $newid = $DB->insert_record('vm_courses', $result);
+            $newid = $DB->insert_record('kronossandvm_courses', $result);
             $result->id = $newid;
             echo html_writer::tag('p', get_string('csvcreate', 'mod_kronossandvm', $result));
         }
