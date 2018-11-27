@@ -60,6 +60,6 @@ if ($ADMIN->fulltree) {
 $ADMIN->add('modkronossandvmfolder', $settings);
 $ADMIN->add('modkronossandvmfolder', new admin_externalpage('virtualtemplates', get_string('managetemplates', 'mod_kronossandvm'),
         $CFG->wwwroot.'/mod/kronossandvm/vmcourses.php'));
-$ADMIN->add('modkronossandvmfolder', new admin_externalpage('virtualtemplatescsv', get_string('managetemplatescsv', 'mod_kronossandvm'),
-        $CFG->wwwroot.'/mod/kronossandvm/vmcourses_csv.php'));
+$ADMIN->add('modkronossandvmfolder', new admin_externalpage('virtualtemplatescsv',
+    get_string('managetemplatescsv', 'mod_kronossandvm'), $CFG->wwwroot.'/mod/kronossandvm/vmcourses_csv.php'));
 $settings = null;

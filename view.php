@@ -82,7 +82,8 @@ $refreshbutton = html_writer::tag('div', kronossandvm_get_update_form($id), arra
 
 // When request submitted it will process here.
 if (!empty($submitted)) {
-    if ($vmrequests = $DB->get_records('kronossandvm_requests', array('vmid' => $kronossandvm->id, 'userid' => $USER->id, 'isactive' => 1))) {
+    if ($vmrequests = $DB->get_records('kronossandvm_requests',
+        array('vmid' => $kronossandvm->id, 'userid' => $USER->id, 'isactive' => 1))) {
         $PAGE->set_periodic_refresh_delay(60);
         $msg = get_string('systembeingprepared', 'kronossandvm');
     } else {
@@ -114,7 +115,8 @@ $strkronossandvm = get_string('modulename', 'kronossandvm');
 // If there is no active VM, check if able to request a VM.
 // If they can then provide the request button, if they cannot then provide warning message.
 
-if ($vmrequests = $DB->get_records('kronossandvm_requests', array('vmid' => $kronossandvm->id, 'userid' => $USER->id, 'isactive' => 1))) {
+if ($vmrequests = $DB->get_records('kronossandvm_requests',
+    array('vmid' => $kronossandvm->id, 'userid' => $USER->id, 'isactive' => 1))) {
     foreach ($vmrequests as $vmrequest) {
         if (empty($vmrequest->instanceip)) {
             $notes = '';

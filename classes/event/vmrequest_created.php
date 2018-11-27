@@ -56,6 +56,7 @@ class vmrequest_created extends \core\event\base {
      * Migration of add_to_log call.
      */
     public function get_legacy_logdata() {
-        return array($this->courseid, 'kronossandvm', 'view', 'view.php?id='.$this->contextinstanceid, $this->objectid, $this->contextinstanceid);
+        return array($this->courseid, 'kronossandvm', 'view', 'view.php?id='.$this->contextinstanceid, $this->objectid,
+            $this->contextinstanceid);
     }
 }

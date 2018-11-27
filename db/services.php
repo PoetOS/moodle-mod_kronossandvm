@@ -23,6 +23,8 @@
  * @copyright  (C) 2015 Remote Learner.net Inc http://www.remote-learner.net
  */
 
+defined('MOODLE_INTERNAL') || die();
+
 $functions = array (
     'mod_kronossandvm_external_vm_requests' => array (
         'classname' => 'mod_kronossandvm_external',

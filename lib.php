@@ -23,6 +23,8 @@
  * @copyright  (C) 2015 Remote Learner.net Inc http://www.remote-learner.net
  */
 
+defined('MOODLE_INTERNAL') || die();
+
 require_once($CFG->libdir.'/eventslib.php');
 
 /**
@@ -61,7 +63,7 @@ function kronossandvm_update_instance($kronossandvm) {
  */
 function kronossandvm_delete_instance($id) {
     global $DB;
-    if (!$kronossandvm = $DB->get_record('kronossandvm', array('id' => $id))) {
+    if (!$DB->get_record('kronossandvm', array('id' => $id))) {
         return false;
     }
 
@@ -69,7 +71,7 @@ function kronossandvm_delete_instance($id) {
         return false;
     }
 
-    if (!$context = context_module::instance($cm->id, IGNORE_MISSING)) {
+    if (!context_module::instance($cm->id, IGNORE_MISSING)) {
         return false;
     }
 
@@ -155,11 +157,6 @@ function kronossandvm_get_message($context, $instanceid) {
                    AND d.data = ?
                    AND r.requesttime > ?';
     $max = $CFG->mod_kronossandvm_requestssolutionperday;
-    $sql1 = 'SELECT r.*
-               FROM {kronossandvm_requests} r, {user_info_data} d
-              WHERE d.userid = r.userid
-                    AND d.fieldid = ?
-                    AND d.data = ?';
     $total = $DB->count_records_sql($sql, array($solutionid->id, $solutionid->data, $today));
     if ($total >= $max) {
         $msg = get_string('persolutionrestriction', 'kronossandvm', $CFG);

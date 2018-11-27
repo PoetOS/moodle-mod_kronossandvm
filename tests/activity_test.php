@@ -175,7 +175,7 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
         $newreq = new stdClass();
         $newreq->vmid = $this->kronossandvm->id;
         $newreq->userid = $this->users[0]->id;
-        $reqid = kronossandvm_add_vmrequest($this->context, $this->kronossandvm, $newreq);
+        kronossandvm_add_vmrequest($this->context, $this->kronossandvm, $newreq);
         $this->setUser($this->users[0]);
         list ($allow, $message) = kronossandvm_get_message($this->context, $this->instance->id);
         $obj = new stdClass();
@@ -198,7 +198,7 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
         $newreq->isactive = 1;
         $newreq->userid = $this->users[0]->id;
         for ($i = 0; $i < ($CFG->mod_kronossandvm_requestssolutionperday + 2); $i++) {
-            $reqid = kronossandvm_add_vmrequest($this->context, $this->kronossandvm, $newreq);
+            kronossandvm_add_vmrequest($this->context, $this->kronossandvm, $newreq);
         }
         // Login as another user other wise you will get max sessions for user message.
         $this->setcustomfielddata($this->users[1]->id, 'test');
@@ -218,7 +218,7 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
         $newreq->isactive = 1;
         $newreq->userid = $this->users[0]->id;
         for ($i = 0; $i < ($CFG->mod_kronossandvm_requestsconcurrentpercustomer + 2); $i++) {
-            $reqid = kronossandvm_add_vmrequest($this->context, $this->kronossandvm, $newreq);
+            kronossandvm_add_vmrequest($this->context, $this->kronossandvm, $newreq);
         }
         // Login as another user other wise you will get max sessions for user message.
         $this->setcustomfielddata($this->users[1]->id, 'test');
@@ -231,14 +231,13 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
      * Test vmrequest_created event.
      */
     public function test_create_event_vmrequest_created() {
-        global $DB;
         $this->setupcustomfield();
         // For capturing events.
         $sink = $this->redirectEvents();
         $newreq = new stdClass();
         $newreq->vmid = $this->kronossandvm->id;
         $newreq->userid = $this->users[0]->id;
-        $reqid = kronossandvm_add_vmrequest($this->context, $this->kronossandvm, $newreq);
+        kronossandvm_add_vmrequest($this->context, $this->kronossandvm, $newreq);
         $events = $sink->get_events();
         $this->assertCount(1, $events);
         $data = $events[0]->get_data();
@@ -259,7 +258,8 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
         $newreq->instanceid = 'bb&#d33';
         $link = kronossandvm_buildurl($newreq);
         $this->assertEquals('http://edweb2.kronos.com/onsite/connectvm.aspx?sIP=1.2.3.4', $link);
-        $CFG->mod_kronossandvm_requesturl = 'http://edweb2.kronos.com/test.asp?ip={instanceip}&userid={userid}&vmid={vmid}&instanceid={instanceid}';
+        $CFG->mod_kronossandvm_requesturl =
+            'http://edweb2.kronos.com/test.asp?ip={instanceip}&userid={userid}&vmid={vmid}&instanceid={instanceid}';
         $expected = 'http://edweb2.kronos.com/test.asp?ip='.$newreq->instanceip;
         $expected .= '&userid='.$newreq->userid.'&vmid='.$newreq->vmid.'&instanceid='.urlencode($newreq->instanceid);
         $link = kronossandvm_buildurl($newreq);
@@ -344,7 +344,8 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
         $requesttime = '1978-03-01 05:00:00';
         $starttime = '1979-01-09 01:00:00';
         $endtime = '1979-01-09 16:00:00';
-        $result = $webservice->update_vm_request($reqid, $requesttime, $starttime, $endtime, 8, '1.2.3.4', 1, 'user1', 'password1', 1);
+        $result = $webservice->update_vm_request($reqid, $requesttime, $starttime, $endtime, 8, '1.2.3.4', 1,
+            'user1', 'password1', 1);
         $this->assertEquals('success', $result['status']);
         $this->assertEquals($reqid, $result['id']);
 
@@ -403,7 +404,7 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
      * Test updating virtual machine request with an invalid date.
      */
     public function test_webservice_update_vm_request_invaliddate() {
-        global $DB, $CFG;
+        global $CFG;
         require_once($CFG->dirroot.'/mod/kronossandvm/externallib.php');
         // Setup.
         $webservice = new mod_kronossandvm_external();
@@ -421,14 +422,14 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
         $this->expectException('invalid_parameter_exception');
         $this->expectExceptionMessage('Invalid parameter value detected (Invalid value for requesttime, date format should be ' .
             'YYYY-MM-DD HH:MM:SS)');
-        $result = $webservice->update_vm_request($reqid, $requesttime, $starttime, $endtime, 8, '1.2.3.4', 1, 'user1', 'password1', 1);
+        $webservice->update_vm_request($reqid, $requesttime, $starttime, $endtime, 8, '1.2.3.4', 1, 'user1', 'password1', 1);
     }
 
     /**
      * Test deleting virtual machine request.
      */
     public function test_webservice_delete_vm_request() {
-        global $DB, $CFG;
+        global $CFG;
         require_once($CFG->dirroot.'/mod/kronossandvm/externallib.php');
         // Setup.
         $webservice = new mod_kronossandvm_external();
@@ -464,7 +465,7 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
      * Test deleting virtual machine request that does not exist.
      */
     public function test_webservice_delete_vm_request_exception() {
-        global $DB, $CFG;
+        global $CFG;
         require_once($CFG->dirroot.'/mod/kronossandvm/externallib.php');
         // Setup.
         $webservice = new mod_kronossandvm_external();
@@ -476,7 +477,7 @@ class mod_kronossandvm_activity_testcase extends advanced_testcase {
         $newreq->userid = $this->users[0]->id;
         $reqidone = kronossandvm_add_vmrequest($this->context, $this->kronossandvm, $newreq);
         // Delete request.
-        $result = $webservice->delete_vm_request($reqidone);
+        $webservice->delete_vm_request($reqidone);
         // Delete record that does not exist.
         $this->expectException('invalid_parameter_exception');
         $this->expectExceptionMessage('Invalid parameter value detected (Record does not exist for id: '.$reqidone.')');

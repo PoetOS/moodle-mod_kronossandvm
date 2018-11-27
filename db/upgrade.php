@@ -15,13 +15,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
-* Kronos virtual machine request web service.
-*
-* @package    mod_kronossandvm
-* @author     Remote-Learner.net Inc
-* @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-* @copyright  (C) 2015 Remote Learner.net Inc http://www.remote-learner.net
-*/
+ * Kronos virtual machine request web service.
+ *
+ * @package    mod_kronossandvm
+ * @author     Remote-Learner.net Inc
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @copyright  (C) 2015 Remote Learner.net Inc http://www.remote-learner.net
+ */
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -29,9 +29,8 @@ function xmldb_kronossandvm_upgrade($oldversion=0) {
     global $DB;
 
     $dbman = $DB->get_manager();
-    $result = true;
 
-    if ($result && $oldversion < 2018110101) {
+    if ($oldversion < 2018110101) {
         // Rename the tables using proper Moodle convention.
         $table = new xmldb_table('vm_requests');
         if ($dbman->table_exists($table)) {
@@ -45,5 +44,5 @@ function xmldb_kronossandvm_upgrade($oldversion=0) {
         upgrade_mod_savepoint(true, 2018110101, 'kronossandvm');
     }
 
-    return $result;
+    return true;
 }

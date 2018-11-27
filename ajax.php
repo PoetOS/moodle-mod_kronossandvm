@@ -41,7 +41,8 @@ require_capability('mod/kronossandvm:addinstance', $context);
 $like = '';
 $and = '';
 $param = array();
-foreach (array('otcourseno', 'coursename', 'imageid', 'imagename', 'vmwareno', 'imagesource', 'imagetype', 'tusername', 'tpassword') as $name) {
+foreach (array('otcourseno', 'coursename', 'imageid', 'imagename', 'vmwareno', 'imagesource', 'imagetype',
+    'tusername', 'tpassword') as $name) {
     $like .= $and.$DB->sql_like($name, '?', false);
     $param[] = '%'.$query.'%';
     $and = ' OR ';

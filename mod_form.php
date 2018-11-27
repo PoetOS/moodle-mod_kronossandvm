@@ -38,7 +38,7 @@ class mod_kronossandvm_mod_form extends moodleform_mod {
      * Define form for settings.
      */
     public function definition() {
-        global $DB, $USER, $CFG, $PAGE;
+        global $DB, $CFG, $PAGE;
 
         $mform =& $this->_form;
         $options = $DB->get_records_menu("kronossandvm_courses", array('isactive' => 1), 'imageid', 'id, coursename');
@@ -57,7 +57,8 @@ class mod_kronossandvm_mod_form extends moodleform_mod {
                 'course' => $this->current->course
             );
             $PAGE->requires->css('/mod/kronossandvm/styles.css');
-            $PAGE->requires->yui_module('moodle-mod_kronossandvm-vmcoursesautocmp', 'M.mod_kronossandvm.init', array($params), null, true);
+            $PAGE->requires->yui_module('moodle-mod_kronossandvm-vmcoursesautocmp', 'M.mod_kronossandvm.init',
+                array($params), null, true);
 
             $mform->addElement('text', 'name', get_string('name'), array('size' => '64'));
             $mform->setType('name', PARAM_TEXT);

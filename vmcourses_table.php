@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die();
+
 require_once("$CFG->libdir/tablelib.php");
 
 /**
@@ -45,7 +47,8 @@ class vmcourses_table extends table_sql {
         $this->define_headers($headers);
         $this->sortable(true, 'id', SORT_DESC);
         // Set sql for table.
-        $fields = "c.id, c.coursename, c.imageid, c.imagetype, (SELECT COUNT(*) FROM {kronossandvm} k WHERE k.otcourseid = c.id) instances";
+        $fields = "c.id, c.coursename, c.imageid, c.imagetype, " .
+            "(SELECT COUNT(*) FROM {kronossandvm} k WHERE k.otcourseid = c.id) instances";
         $from = "{kronossandvm_courses} c";
         $this->set_sql($fields, $from, '1 = 1', null);
         $this->no_sorting("id");
@@ -72,7 +75,8 @@ class vmcourses_table extends table_sql {
     public function col_instances($values) {
         global $CFG;
         if (!empty($values->instances)) {
-            $link = new moodle_url($CFG->wwwroot.'/mod/kronossandvm/vmcourses.php', array('action' => 'instances', 'id' => $values->id));
+            $link = new moodle_url($CFG->wwwroot.'/mod/kronossandvm/vmcourses.php',
+                array('action' => 'instances', 'id' => $values->id));
             return html_writer::tag('a', $values->instances, array('href' => $link));
         }
         return $values->instances;

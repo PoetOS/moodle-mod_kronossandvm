@@ -39,7 +39,8 @@ if (!kronossandvm_canconfig()) {
     print_error('nopermissiontoshow');
 }
 
-$results = $DB->get_records_sql('SELECT c.id, c.fullname FROM {kronossandvm} k, {course} c WHERE c.id = k.course AND k.otcourseid = ?', array($id));
+$results = $DB->get_records_sql('SELECT c.id, c.fullname FROM {kronossandvm} k, {course} c ' .
+    'WHERE c.id = k.course AND k.otcourseid = ?', array($id));
 if (empty($results)) {
     $DB->delete_records('kronossandvm_courses', array('id' => $id));
     redirect(new moodle_url($CFG->wwwroot.'/mod/kronossandvm/vmcourses.php', array('action' => 'list')));
