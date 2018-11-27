@@ -271,7 +271,8 @@ class mod_kronossandvm_external extends external_api {
     public static function update_vm_request_returns() {
         return new external_single_structure(array(
             'id' => new external_value(PARAM_INT, 'Id of request'),
-            'status' => new external_value(PARAM_TEXT, 'Status of update request. "success" on successful update. Execption thrown on invalid id, date, isactive, isscript.')
+            'status' => new external_value(PARAM_TEXT,'Status of update request. "success" on successful update. ' .
+                'Execption thrown on invalid id, date, isactive, isscript.')
         ));
     }
 
@@ -309,7 +310,8 @@ class mod_kronossandvm_external extends external_api {
     public static function delete_vm_request_returns() {
         return new external_single_structure(array(
             'id' => new external_value(PARAM_INT, 'Id of request'),
-            'status' => new external_value(PARAM_TEXT, 'Status of update request. "success" on successful update. Exception thrown on error.')
+            'status' => new external_value(PARAM_TEXT, 'Status of update request. "success" on successful update. ' .
+                'Exception thrown on error.')
         ));
     }
 }
