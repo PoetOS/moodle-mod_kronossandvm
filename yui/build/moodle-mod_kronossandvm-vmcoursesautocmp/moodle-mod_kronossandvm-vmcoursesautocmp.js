@@ -30,7 +30,6 @@ Y.extend(VMCOURSESAUTOCMP, Y.Base, {
             requestTemplate: '?&q={query}&course='+params.course,
             resultListLocator: function (response) {
                 // Make sure to return the result object.  It contains the names of the vmcourses.
-                console.log(response[0].result);
                 return response[0].result;
             },
             resultTextLocator: function (result) {
